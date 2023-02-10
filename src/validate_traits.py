@@ -1,5 +1,8 @@
 '''
-Validate PROSAIL-derived and in-situ measured traits
+Validate PROSAIL-derived and in-situ measured traits by
+calculating common error metrics and plotting scatter.
+
+@author: Lukas Valentin Graf
 '''
 
 import geopandas as gpd
@@ -26,12 +29,24 @@ def validate_data(
     trait_name: str,
     trait_unit: str,
     trait_limits: TraitLimits,
-    orig_trait_data: Path,
 ) -> None:
     """
-    Validate S2-based trait retrieval against in-situ reference data
+    Validate S2-based trait retrieval against in-situ reference data.
+
+    :param _df:
+        DataFrame with S2-based traits and in-situ reference
+    :param out_dir:
+        directory where outputs should be saved to
+    :param trait:
+        abbreviation of the trait to validate (DataFrame column)
+    :param trait_name:
+        full name of the trait for labeling axis in plot
+    :param trait_unit:
+        phyiscal unit of the trait
+    :param trait_limits:
+        limits of the trait for plotting
     """
-    trait_data = gpd.read_file(orig_trait_data)
+
     df = _df.copy()
     df.dropna(subset=[trait], inplace=True)
 
@@ -199,8 +214,10 @@ if __name__ == '__main__':
             out_dir.mkdir(exist_ok=True)
             # join in-situ and inversion data
             insitu_trait_df = gpd.read_file(trait_settings[trait]['orig_trait_data'])
+            del trait_settings[trait]['orig_trait_data']
             fpath_joined_res = out_dir.joinpath(f'inv_res_joined_with_insitu_{trait}.csv')
 
+            # join S2 and in-situ data are read data from existing file
             if not fpath_joined_res.exists():
                 joined = join_with_insitu(insitu_trait_df, bbch_insitu, inv_res_df, [trait])
                 joined.to_csv(fpath_joined_res)
