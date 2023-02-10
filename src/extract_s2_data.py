@@ -1,6 +1,8 @@
 '''
-Extract Sentinel-2 SRF data for selected field parcels over the growing season
-and run PROSAIL simulations
+Extract Sentinel-2 surface reflectance (SRF) data for selected field parcels
+over the growing season and run PROSAIL simulations.
+
+@author Lukas Valentin Graf
 '''
 
 import cv2
@@ -21,13 +23,20 @@ from typing import Any, Dict, List
 from utils import get_farms
 
 logger = get_settings().logger
+# Sentinel-2 bands to extract and use for PROSAIL runs
 band_selection = ['B02','B03','B04','B05','B06','B07','B8A','B11','B12']
 
-def extract_s2_spectra(
+def get_s2_mapper(
     s2_mapper_config: Dict[str, Any]
 ) -> Sentinel2Mapper:
     """
-    Extract S2 data using EOdal
+    Get an EOdal Mapper instance
+
+    :param s2_mapper_config:
+        configuration telling EOdal what to do (which geographic region and time
+        period should be processed)
+    :returns:
+        EODal Sentinel-2 mapper instance
     """
     # setup Sentinel-2 mapper to get the relevant scenes
     mapper_configs = MapperConfigs(
@@ -53,17 +62,31 @@ def get_s2_spectra(
 ) -> None:
     """
     Extract S2 SRF for field parcel geometries and run PROSAIL in forward mode
+
+    :param output_dir:
+        directory where to save extracted S2 data and PROSAIL outputs to
+    :param lut_params_dir:
+        directory where the PROSAIL inputs are stored
+    :param s2_mapper_config:
+        configuration telling EOdal what to do (which geographic region and time
+        period should be processed)
+    :param rtm_lut_config:
+        configuration telling how to build the lookup tables (LUTs) required
+        to run PROSAIL
+    :param traits:
+        name of the PROSAIL traits to save to the LUTs (determines which traits
+        are available from the inversion)
     """
     trait_str = '-'.join(traits)
 
-    mapper = extract_s2_spectra(s2_mapper_config)
+    mapper = get_s2_mapper(s2_mapper_config)
     # get spectral data
     s2_data = mapper.get_complete_timeseries()
     # extraction is based on features (1 to N field parcel geometries)
     features = mapper.feature_collection['features']
 
     # loop over features and perform inversion
-    for idx, feature in enumerate(features):
+    for idx, _ in enumerate(features):
         feature_id = mapper.get_feature_ids()[idx]
         feature_scenes = s2_data[feature_id]
         feature_metadata = mapper.observations[feature_id]
@@ -177,10 +200,9 @@ def get_s2_spectra(
 
 if __name__ == '__main__':
 
-    import sys
     data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/02_Field-Campaigns')
     year = 2022 # 2022
-    farms = [sys.argv[1]] #['Strickhof', 'Arenenberg', 'Witzwil']
+    farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)

@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore')
 
 band_selection = ['B02','B03','B04','B05','B06','B07','B8A','B11','B12']
 
-def baseline_model(
+def invert_scenes(
     data_dir: Path,
     farms: List[str],
     n_solutions: Dict[str, int],
@@ -32,7 +32,22 @@ def baseline_model(
     lut_sizes: Dict[str, str]
 ):
     """
-    Lookup table based inversion
+    Lookup table based inversion of S2 imagery. The inversion setup can
+    be adopted for each phenological macro-stage.
+
+    :param data_dir:
+        directory where PROSAIL LUTs and extracted S2 data are located
+    :param farms:
+        list of farms to process (data is organized by farms)
+    :param n_solutions:
+        number of solutions of the inversion to use per phenological macro-stage
+    :param cost_functions:
+        cost function per phenological macro-stage
+    :param aggregation_methods:
+        aggregation methods of the solutions found per phenological macro-stage
+    :param lut_sizes:
+        LUT sizes (i.e., number of PROSAIL spectra) to use per phenological
+        macro-stage to run the inversion
     """
     # loop over locations
     for farm in farms:
@@ -169,7 +184,7 @@ if __name__ == '__main__':
         'flowering-fruitdevelopment-plantdead': 50000
     }
 
-    baseline_model(
+    invert_scenes(
         data_dir,
         farms,
         n_solutions=n_solutions,

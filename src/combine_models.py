@@ -21,7 +21,7 @@ from utils import (
     read_site_characteristics
 )
 
-MERGE_TOLERANCE = 10  # Growing Degrees [deg C]
+MERGE_TOLERANCE = 20  # Growing Degrees [deg C]
 
 GDD_CRITICAL_SE = [740, 870]  # Growing Degrees [deg C] # updated with 2021 + 2022 data
 GDD_DEFAULT_SE = 800

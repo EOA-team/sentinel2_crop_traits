@@ -138,6 +138,20 @@ def join_with_insitu(
     traits: List[str]
 ) -> pd.DataFrame:
     """
+    Join in-situ trait measurements and S2 observations based on location
+    and temperature sums (GDD). Add BBCH in-situ ratings.
+
+    :param insitu_df:
+        DataFrame with in-situ measurements of trait(s)
+    :param bbch_insitu:
+        in-situ BBCH ratings
+    :param inv_res_df:
+        inversion results from S2 obtained at the sampling locations
+        where in-situ measurements and ratings were carried out
+    :param traits:
+        name of the traits (DataFrame columns) to join data onto
+    :returns:
+        joined dataframe
     """
 
     joined_res = []
@@ -282,6 +296,9 @@ def plot_prediction(
 
 def bbch_confusion_matrix(df: pd.DataFrame, out_dir: Path) -> None:
     """
+    Generate confusion matrix of in-situ rated and S2-derived
+    phenological macro-stages. The confusion matrix and f1-scores
+    are saved to disk as csv files.
     """
     df['BBCH Rating (Macro-Stages)'] = df['BBCH Rating'].apply(
         lambda x, assign_macro_stages=assign_macro_stages:
