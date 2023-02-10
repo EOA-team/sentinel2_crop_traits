@@ -2,7 +2,7 @@
 Validate PROSAIL-derived and in-situ measured traits by
 calculating common error metrics and plotting scatter.
 
-@author: Lukas Valentin Graf
+@author Lukas Valentin Graf
 '''
 
 import geopandas as gpd

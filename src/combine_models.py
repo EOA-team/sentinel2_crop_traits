@@ -1,5 +1,8 @@
 '''
-Combine models from different phenological phases
+Implementation of the temperature-based phenology model (from field
+phenotyping).
+
+@author Lukas Valentin Graf
 '''
 
 import geopandas as gpd
@@ -363,10 +366,6 @@ def combine_model_results_with_insitu(
                             fpath_model,
                             vector_features=parcel_gdf
                         )
-                        # mask = pred_ds['Green Leaf Area Index'] == 1e+20
-                        # pred_ds = pred_ds.mask(
-                        #     mask=mask.values
-                        # )
                         pheno_phase_model = fpath_model.name.split('_')[0]
                         # get pixel values at sampling points
                         parcel_point_utm = parcel_point.to_crs(pred_ds[pred_ds.band_names[0]].crs)
