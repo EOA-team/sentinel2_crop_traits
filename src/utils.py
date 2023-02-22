@@ -121,7 +121,7 @@ def get_farms(data_dir: Path, farms: List[str], year: int) -> Dict[str, gpd.GeoD
     res = {}
     for farm in farms:
         parcels = []
-        for fpath_farm_shp in data_dir.rglob(f'{farm}/WW_{year}/*.shp'):
+        for fpath_farm_shp in data_dir.rglob(f'{farm}/*.shp'):
             farm_shp = gpd.read_file(fpath_farm_shp)
             parcels.append(farm_shp[['geometry']].copy())
         farm_gdf = pd.concat(parcels)
