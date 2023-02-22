@@ -51,7 +51,8 @@ def preprocess_sentinel2_scenes(
     return ds
 
 def get_s2_mapper(
-    s2_mapper_config: MapperConfigs
+    s2_mapper_config: MapperConfigs,
+    output_dir: Path
 ) -> Mapper:
     """
     Setup an EOdal `Mapper` instance, query and load Sentinel-2 data
@@ -59,6 +60,8 @@ def get_s2_mapper(
     :param s2_mapper_config:
         configuration telling EOdal what to do (which geographic region and time
         period should be processed)
+    :param output_dir:
+        directory where to store the query for documentation
     :returns:
         EOdal `Mapper` instance with populated `metadata` and `data`
         attributes
@@ -95,6 +98,13 @@ def get_s2_mapper(
     # delete scenes too cloudy or containing only no-data
     for scene_id in scenes_to_del:
         del mapper.data[scene_id]
+    # save the MapperConfigs as yaml file
+    s2_mapper_config.to_yaml(fpath=output_dir.joinpath('eodal_mapperconfigs.yml'))
+    # save the mapper data as pickled object so it can be loaded again
+    fpath_mapper = output_dir.joinpath('eodal_mapper_scenes.pkl')
+    with open(fpath_mapper, 'wb+') as dst:
+        dst.write(mapper.data.to_pickle())
+
     return mapper
 
 def get_s2_spectra(
@@ -123,7 +133,7 @@ def get_s2_spectra(
     """
     trait_str = '-'.join(traits)
 
-    mapper = get_s2_mapper(s2_mapper_config)
+    mapper = get_s2_mapper(s2_mapper_config, output_dir=output_dir)
     s2_data = mapper.data
     s2_metadata = mapper.metadata
     s2_metadata['sensing_time'] = pd.to_datetime(s2_metadata.sensing_time)
@@ -210,22 +220,18 @@ def get_s2_spectra(
 
 if __name__ == '__main__':
 
-    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/02_Field-Campaigns')
-    year = 2022 # 2022
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    year = 2022
     farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
 
-    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval')
-    # data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/DigiN19')
-    out_dir = data_dir.joinpath('lut_based_inversion')
+    out_dir = Path('../results').joinpath('lut_based_inversion')
     out_dir.mkdir(exist_ok=True)
 
     # spectral response function of Sentinel-2 for resampling PROSAIL output
-    fpath_srf = Path(
-        '/home/graflu/public/Evaluation/Satellite_data/Sentinel-2/Documentation/S2_Specsheets/S2-SRF_COPE-GSEG-EOPG-TN-15-0007_3.1.xlsx'
-    )
+    fpath_srf = Path('../data/auxiliary/S2-SRF_COPE-GSEG-EOPG-TN-15-0007_3.1.xlsx')
     # RTM configurations for lookup-table generation
     rtm_lut_config = {
         'lut_size': 50000,
@@ -250,7 +256,7 @@ if __name__ == '__main__':
     for farm, geom in farm_gdf_dict.items():
         logger.info(f'Working on {farm}')
         # S2 configuration (for data extraction and pre-processing)
-        feature = Feature(name=farm, geometry=geom)
+        feature = Feature.from_geoseries(gds=geom.geometry)
         s2_mapper_config = MapperConfigs(
             collection='sentinel2-msi',
             time_start=datetime(2022,3,1),
@@ -259,7 +265,7 @@ if __name__ == '__main__':
             metadata_filters=metadata_filters
         )
 
-        output_dir_farm = out_dir.joinpat(farm)
+        output_dir_farm = out_dir.joinpath(farm)
         output_dir_farm.mkdir(exist_ok=True)
         get_s2_spectra(
             output_dir=out_dir,
