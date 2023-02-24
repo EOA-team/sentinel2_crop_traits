@@ -60,9 +60,10 @@ def invert_scenes(
             # load the Sentinel-2 data
             fpath_s2_raster = scene_dir.joinpath('SRF_S2.tiff')
             s2_ds = RasterCollection.from_multi_band_raster(fpath_raster=fpath_s2_raster)
-            s2_spectra = s2_ds.get_values(band_selection=band_selection)
-            bands = s2_ds.band_names
-            bands.remove('SCL')
+            bands = s2_ds.band_names[:-1]
+            s2_spectra = s2_ds.get_values(band_selection=bands)
+            if bands == ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']:
+                bands = band_selection
 
             logger.info(f'{farm}: Started inversion of {scene_dir.name}')
             # find the LUTs generated and use them for inversion
@@ -106,19 +107,19 @@ def invert_scenes(
                 for tdx, trait in enumerate(['lai', 'ccc']):
                     trait_collection.add_band(
                         Band,
-                        geo_info=s2_ds['B02'].geo_info,
+                        geo_info=s2_ds[bands[0]].geo_info,
                         band_name=trait,
                         values=trait_img[tdx,:,:]
                     )
                     trait_collection.add_band(
                         Band,
-                        geo_info=s2_ds['B02'].geo_info,
+                        geo_info=s2_ds[bands[0]].geo_info,
                         band_name=f'{trait}_q05',
                         values=q05_img[tdx,:,:]
                     )
                     trait_collection.add_band(
                         Band,
-                        geo_info=s2_ds['B02'].geo_info,
+                        geo_info=s2_ds[bands[0]].geo_info,
                         band_name=f'{trait}_q95',
                         values=q95_img[tdx,:,:]
                     )
@@ -131,19 +132,19 @@ def invert_scenes(
                 median_cost_function_vals[np.isnan(trait_img[0,:,:])] = np.nan
                 trait_collection.add_band(
                     Band,
-                    geo_info=s2_ds['B02'].geo_info,
+                    geo_info=s2_ds[bands[0]].geo_info,
                     band_name='lowest_error',
                     values=lowest_cost_function_vals
                 )
                 trait_collection.add_band(
                     Band,
-                    geo_info=s2_ds['B02'].geo_info,
+                    geo_info=s2_ds[bands[0]].geo_info,
                     band_name='highest_error',
                     values=highest_cost_function_vals
                 )
                 trait_collection.add_band(
                     Band,
-                    geo_info=s2_ds['B02'].geo_info,
+                    geo_info=s2_ds[bands[0]].geo_info,
                     band_name='median_error',
                     values=median_cost_function_vals
                 )
@@ -156,8 +157,9 @@ def invert_scenes(
 if __name__ == '__main__':
 
     farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg']
-    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval/lut_based_inversion')
-    # data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/DigiN19/lut_based_inversion')
+    farms = ['Bellechasse_Colza']
+    # data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval/lut_based_inversion')
+    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/trait_retrieval')
 
     cost_functions = {
         'all_phases': 'mae',

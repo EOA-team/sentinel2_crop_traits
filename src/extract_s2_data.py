@@ -250,7 +250,7 @@ if __name__ == '__main__':
     data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/WG_Shapefile_Felder_FerN')
     year = 2022
     # farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
-    farms = ['Bellechasse_Colza'] # , 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
+    farms = ['Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
@@ -296,12 +296,16 @@ if __name__ == '__main__':
 
         output_dir_farm = out_dir.joinpath(farm)
         output_dir_farm.mkdir(exist_ok=True)
-        get_s2_spectra(
-            output_dir=output_dir_farm,
-            lut_params_dir=lut_params_dir,
-            s2_mapper_config=s2_mapper_config,
-            rtm_lut_config=rtm_lut_config,
-            traits=traits
-        )
+        try:
+            get_s2_spectra(
+                output_dir=output_dir_farm,
+                lut_params_dir=lut_params_dir,
+                s2_mapper_config=s2_mapper_config,
+                rtm_lut_config=rtm_lut_config,
+                traits=traits
+            )
+        except Exception as e:
+            logger.error(f'Farm {farm}: {e}')
+            continue
 
         logger.info(f'Finished working on {farm}')
