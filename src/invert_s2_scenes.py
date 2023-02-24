@@ -62,8 +62,6 @@ def invert_scenes(
             s2_ds = RasterCollection.from_multi_band_raster(fpath_raster=fpath_s2_raster)
             bands = s2_ds.band_names[:-1]
             s2_spectra = s2_ds.get_values(band_selection=bands)
-            if bands == ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9']:
-                bands = band_selection
 
             logger.info(f'{farm}: Started inversion of {scene_dir.name}')
             # find the LUTs generated and use them for inversion
