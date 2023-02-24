@@ -220,14 +220,17 @@ def get_s2_spectra(
 
 if __name__ == '__main__':
 
-    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    # data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/WG_Shapefile_Felder_FerN')
     year = 2022
-    farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
+    # farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
+    farms = ['Bellechasse_Colza', 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
 
-    out_dir = Path('../results').joinpath('lut_based_inversion')
+    # out_dir = Path('../results').joinpath('lut_based_inversion')
+    out_dir = data_dir.parent.joinpath('trait_retrieval')
     out_dir.mkdir(exist_ok=True)
 
     # spectral response function of Sentinel-2 for resampling PROSAIL output
