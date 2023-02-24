@@ -250,7 +250,7 @@ if __name__ == '__main__':
     data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/WG_Shapefile_Felder_FerN')
     year = 2022
     # farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
-    farms = ['Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
+    farms = ['Bellechasse_Colza', 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
