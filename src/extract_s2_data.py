@@ -5,12 +5,14 @@ over the growing season and run PROSAIL simulations.
 @author Lukas Valentin Graf
 '''
 
+import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle
 
 from datetime import datetime
 from eodal.config import get_settings
+from eodal.core.scene import SceneCollection
 from eodal.core.sensors.sentinel2 import Sentinel2
 from eodal.mapper.feature import Feature
 from eodal.mapper.filter import Filter
@@ -71,6 +73,20 @@ def get_s2_mapper(
     """
     # setup Sentinel-2 mapper to get the relevant scenes
     mapper = Mapper(s2_mapper_config)
+
+    # check if the metadata and data has been already saved.
+    # In this case we can simply read the data from file and create
+    # a new mapper instance
+    fpath_metadata = output_dir.joinpath('eodal_mapper_metadata.gpkg')
+    fpath_mapper = output_dir.joinpath('eodal_mapper_scenes.pkl')
+    if fpath_mapper.exists() and fpath_metadata.exists():
+        metadata = gpd.read_file(fpath_metadata)
+        scenes = SceneCollection.from_pickle(stream=fpath_mapper)
+        mapper.data = scenes
+        mapper.metadata = metadata
+        return mapper
+
+    # otherwise, it's necessary to query the data again
     # query metadata records
     mapper.query_scenes()
     # load the Sentinel-2 scenes and resample them to 10 m, apply cloud masking
@@ -102,13 +118,11 @@ def get_s2_mapper(
     for scene_id in scenes_to_del:
         del mapper.data[scene_id]
     # save the MapperConfigs as yaml file
-    s2_mapper_config.to_yaml(fpath=output_dir.joinpath('eodal_mapperconfigs.yml'))
+    s2_mapper_config.to_yaml(fpath=output_dir.joinpath('eodal_mapper_configs.yml'))
     # save the mapper data as pickled object so it can be loaded again
-    fpath_mapper = output_dir.joinpath('eodal_mapper_scenes.pkl')
     with open(fpath_mapper, 'wb+') as dst:
         dst.write(mapper.data.to_pickle())
     # save the mapper metadata as GeoPackage
-    fpath_metadata = output_dir.joinpath('eodal_mapper_metadata.gpkg')
     mapper.metadata.sensing_date = mapper.metadata.sensing_date.astype(str)
     if 'real_path' in mapper.metadata.columns:
         mapper.metadata.real_path = mapper.metadata.real_path.astype(str)
@@ -147,12 +161,12 @@ def get_s2_spectra(
     mapper = get_s2_mapper(s2_mapper_config, output_dir=output_dir)
     s2_data = mapper.data
     s2_metadata = mapper.metadata
-    s2_metadata['sensing_time'] = pd.to_datetime(s2_metadata.sensing_time)
+    s2_metadata['sensing_date'] = pd.to_datetime(s2_metadata.sensing_date)
     # loop over mapper
     for _, scene in s2_data:
         # make sure we're looking at the right metadata
         metadata = s2_metadata[
-            s2_metadata.sensing_time.dt.date == \
+            s2_metadata.sensing_date.dt.date == \
             scene.scene_properties.acquisition_time.date()
         ]
         # to speed model development introduce some calendar checks, i.e., we
