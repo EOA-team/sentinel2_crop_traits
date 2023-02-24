@@ -22,7 +22,10 @@ from typing import Any, Dict, List
 
 from utils import get_farms
 
-logger = get_settings().logger
+settings = get_settings()
+settings.USE_STAC = False
+logger = settings.logger
+
 # Sentinel-2 bands to extract and use for PROSAIL runs
 band_selection = ['B02','B03','B04','B05','B06','B07','B8A','B11','B12']
 
@@ -104,6 +107,14 @@ def get_s2_mapper(
     fpath_mapper = output_dir.joinpath('eodal_mapper_scenes.pkl')
     with open(fpath_mapper, 'wb+') as dst:
         dst.write(mapper.data.to_pickle())
+    # save the mapper metadata as GeoPackage
+    fpath_metadata = output_dir.joinpath('eodal_mapper_metadata.gpkg')
+    mapper.metadata.sensing_date = mapper.metadata.sensing_date.astype(str)
+    if 'real_path' in mapper.metadata.columns:
+        mapper.metadata.real_path = mapper.metadata.real_path.astype(str)
+    if '_processing_level' in mapper.metadata.columns:
+        mapper.metadata._processing_level = mapper.metadata._processing_level.astype(str)
+    mapper.metadata.to_file(fpath_metadata)
 
     return mapper
 
@@ -146,14 +157,15 @@ def get_s2_spectra(
         ]
         # to speed model development introduce some calendar checks, i.e., we
         # don't need to run all simulations all the time
-        scene_month = pd.to_datetime(metadata.sensing_time.iloc[0]).month
-        pheno_phase_selection = None
-        if scene_month in [3]:
-            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
-        elif scene_month in [4]:
-            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
-        elif scene_month in [5, 6]:
-            pheno_phase_selection = ['all_phases', 'stemelongation-endofheading', 'flowering-fruitdevelopment-plantdead']
+        # scene_month = pd.to_datetime(metadata.sensing_time.iloc[0]).month
+        # pheno_phase_selection = None
+        # if scene_month in [3]:
+        #     pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+        # elif scene_month in [4]:
+        #     pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+        # elif scene_month in [5, 6]:
+        #     pheno_phase_selection = ['all_phases', 'stemelongation-endofheading', 'flowering-fruitdevelopment-plantdead']
+        pheno_phase_selection = ['all_phases']
 
         # get viewing and illumination angles for PROSAIL run
         angle_dict = {
@@ -224,7 +236,7 @@ if __name__ == '__main__':
     data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/WG_Shapefile_Felder_FerN')
     year = 2022
     # farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
-    farms = ['Bellechasse_Colza', 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
+    farms = ['Bellechasse_Colza'] # , 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
@@ -271,7 +283,7 @@ if __name__ == '__main__':
         output_dir_farm = out_dir.joinpath(farm)
         output_dir_farm.mkdir(exist_ok=True)
         get_s2_spectra(
-            output_dir=out_dir,
+            output_dir=output_dir_farm,
             lut_params_dir=lut_params_dir,
             s2_mapper_config=s2_mapper_config,
             rtm_lut_config=rtm_lut_config,
