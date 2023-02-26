@@ -1,5 +1,7 @@
 '''
 Utility functions
+
+@author Lukas Valentin Graf
 '''
 
 import geopandas as gpd
