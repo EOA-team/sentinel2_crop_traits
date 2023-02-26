@@ -1,7 +1,8 @@
-
 '''
 Inversion of Sentinel-2 data for crop trait retrieval using
 PROSAIL lookup tables
+
+@author Lukas Valentin Graf
 '''
 
 import numpy as np
@@ -155,10 +156,8 @@ def invert_scenes(
 if __name__ == '__main__':
 
     farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg']
-    farms = ['Bellechasse_Colza']
-    # data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval/lut_based_inversion')
-    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/trait_retrieval')
-
+    data_dir = Path('../results/lut_based_inversion')
+    
     cost_functions = {
         'all_phases': 'mae',
         'germination-endoftillering': 'rmse',
