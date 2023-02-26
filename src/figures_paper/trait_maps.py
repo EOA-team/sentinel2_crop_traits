@@ -118,10 +118,8 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
 
 if __name__ == '__main__':
 
-    data_dir = Path('../results/lut_based_inversion/Witzwil')
-    out_dir = Path('../results/Figures')
+    data_dir = Path('../../results/lut_based_inversion/Witzwil')
+    out_dir = Path('../../results/Figures')
     out_dir.mkdir(exist_ok=True)
 
     plot_trait_maps(data_dir, out_dir)
-
-            

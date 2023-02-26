@@ -87,9 +87,9 @@ def get_parcel_ts(
 if __name__ == '__main__':
 
     # in-situ measurements and inversion results of traits
-    data_dir = Path('../results/lut_based_inversion')
+    data_dir = Path('../../results/lut_based_inversion')
     # data_dir = Path('/mnt/ides/Lukas/04_Work/lut_based_inversion')
-    out_dir = Path('../results/Figures')
+    out_dir = Path('../../results/Figures')
 
     traits = ['lai']
     trait_settings = {
