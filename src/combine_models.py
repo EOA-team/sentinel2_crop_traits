@@ -1,6 +1,6 @@
 '''
 Implementation of the temperature-based phenology model (from field
-phenotyping).
+phenotyping) to combine RTM outputs for trait retrieval.
 
 @author Lukas Valentin Graf
 '''
@@ -23,6 +23,7 @@ from utils import (
 
 MERGE_TOLERANCE = 20  # Growing Degrees [deg C]
 
+# AGDD windows for switching between phenological macro-stages
 GDD_CRITICAL_SE = [740, 870]  # Growing Degrees [deg C] # updated with 2021 + 2022 data
 GDD_DEFAULT_SE = 800
 GDD_CRITICAL_AN = [1380, 1600]  # Growing Degrees [deg C]
@@ -445,7 +446,7 @@ if __name__ == '__main__':
     site_char_df = read_site_characteristics(fpath=fpath_site_char)
 
     # directory where inversion results are stored (stored by S2 acquisitions)
-    inv_res_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval/lut_based_inversion')
+    inv_res_dir = Path('../results/lut_based_inversion')
 
     # traits to extract
     traits = ['lai', 'ccc']
