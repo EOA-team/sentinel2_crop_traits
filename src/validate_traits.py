@@ -174,7 +174,7 @@ def validate_data(
 if __name__ == '__main__':
 
     # paths to in-situ trait measurments
-    trait_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/02_Field-Campaigns/in-situ_traits_2022')
+    trait_dir = Path('../in-situ_traits_2022')
     traits = ['lai', 'ccc']
 
     # in-situ trait values
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     bbch_insitu = gpd.read_file(fpath_insitu_bbch)
 
     # traits from inversion
-    inv_res_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/PhenomEn22/trait_retrieval/lut_based_inversion')
+    inv_res_dir = Path('../results/lut_based_inversion')
     sub_dirs = ['agdds_and_s2', 'agdds_only']
 
     # validate traits
