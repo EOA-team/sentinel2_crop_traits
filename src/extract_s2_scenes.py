@@ -171,15 +171,14 @@ def get_s2_spectra(
         ]
         # to speed model development introduce some calendar checks, i.e., we
         # don't need to run all simulations all the time
-        # scene_month = pd.to_datetime(metadata.sensing_time.iloc[0]).month
-        # pheno_phase_selection = None
-        # if scene_month in [3]:
-        #     pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
-        # elif scene_month in [4]:
-        #     pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
-        # elif scene_month in [5, 6]:
-        #     pheno_phase_selection = ['all_phases', 'stemelongation-endofheading', 'flowering-fruitdevelopment-plantdead']
-        pheno_phase_selection = ['all_phases']
+        scene_month = pd.to_datetime(metadata.sensing_time.iloc[0]).month
+        pheno_phase_selection = None
+        if scene_month in [3]:
+            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+        elif scene_month in [4]:
+            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+        elif scene_month in [5, 6]:
+            pheno_phase_selection = ['all_phases', 'stemelongation-endofheading', 'flowering-fruitdevelopment-plantdead']
 
         # get viewing and illumination angles for PROSAIL run
         angle_dict = {
@@ -246,17 +245,14 @@ def get_s2_spectra(
 
 if __name__ == '__main__':
 
-    # data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
-    data_dir = Path('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/__work__/GLAI-Processor/FerN/WG_Shapefile_Felder_FerN')
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
     year = 2022
-    # farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
-    farms = ['Bellechasse_Colza', 'Bellechasse_Epeautre', 'Grangeneuve_ble', 'Grangeneuve_Colza', 'Grangeneuve_Tritical', 'Sorens_ble']
+    farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
 
     # get field parcel geometries organized by farm
     farm_gdf_dict = get_farms(data_dir, farms, year)
 
-    # out_dir = Path('../results').joinpath('lut_based_inversion')
-    out_dir = data_dir.parent.joinpath('trait_retrieval')
+    out_dir = Path('../results').joinpath('lut_based_inversion')
     out_dir.mkdir(exist_ok=True)
 
     # spectral response function of Sentinel-2 for resampling PROSAIL output
