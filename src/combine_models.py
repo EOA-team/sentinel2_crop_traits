@@ -8,6 +8,7 @@ phenotyping) to combine RTM outputs for trait retrieval.
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import warnings
 
 from eodal.core.raster import RasterCollection
 from pathlib import Path
@@ -20,6 +21,8 @@ from utils import (
     plot_trait_maps,
     read_site_characteristics
 )
+
+warnings.filterwarnings('ignore')
 
 MERGE_TOLERANCE = 20  # Growing Degrees [deg C]
 
@@ -288,7 +291,9 @@ def combine_model_results_with_insitu(
         # search for the inversion results
         inv_res_dir_location = inv_res_dir.joinpath(location_name)
         if not inv_res_dir_location.exists():
+            print(f'Did not find {inv_res_dir_location}')
             continue
+
         # get weather station data (single weather station per site)
         location_name_nowhitespace = location_name.replace(' ', '').lower()
         meteo_file = next(meteo_data_dir.glob(f'*_{location_name_nowhitespace}_daily_mean_temperature*'))
@@ -332,8 +337,9 @@ def combine_model_results_with_insitu(
                     )
                 )
             except Exception as e:
-                print(f'Could not find {location_name} {parcel_name.lower()}: {e}')
+                print(f'Could not find {location_name} {parcel_name}: {e}')
                 continue
+
             res_dir_parcel = res_dir_location.joinpath(parcel_name)
             res_dir_parcel.mkdir(exist_ok=True)
             # find the inversion results available, extract data and assign GDDs
@@ -431,12 +437,113 @@ def combine_model_results_with_insitu(
             res_inv_df['location'] = location_name
             large_res_list.append(res_inv_df)
 
-    large_df = pd.concat(large_res_list)
-    fname = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
-    large_df.to_csv(fname)
+    if len(large_res_list) > 0:
+        large_df = pd.concat(large_res_list)
+        fname = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
+        large_df.to_csv(fname)
 
+# TODO: include logic for 2019 data
+def extract_2019_data(site_char_df: pd.DataFrame, res_dir: Path, traits: List[str]):
+    # loop over sites
+    large_res_list = []
+    parcels = site_char_df.groupby('Parcel')
+    location_name = 'SwissFutureFarm'
+    for parcel_name, _ in parcels:
+
+        fpath_parcel_geom = field_parcel_dir.joinpath(
+            location_name
+        ).joinpath(
+            f'{parcel_name.replace(" ","")}.shp'
+        )
+        parcel_gdf = gpd.read_file(fpath_parcel_geom)
+        # get the corresponding in-situ sampling points
+        try:
+            parcel_points = gpd.read_file(
+                next(
+                    sampling_point_dir.joinpath(location_name).glob(f'{parcel_name}.gpkg')
+                )
+            )
+        except Exception as e:
+            print(f'Could not find {location_name} {parcel_name.lower()}: {e}')
+            continue
+        res_dir_parcel = res_dir.joinpath(parcel_name)
+        res_dir_parcel.mkdir(exist_ok=True)
+        # find the inversion results available, extract data -> there's just one scene
+        inv_res_data_list = []
+        for fpath_inv_res in res_dir.glob('*.SAFE'):
+
+            # get S2 spectra
+            fpath_s2_srf = next(fpath_inv_res.glob('SRF*.tiff'))
+            s2_srf_ds = RasterCollection.from_multi_band_raster(
+                fpath_s2_srf,
+                vector_features=parcel_gdf
+            )
+            inv_res_date = pd.to_datetime(fpath_inv_res.name.split('_')[2][0:8])
+
+            # loop over pixels and save inversion results and spectral data
+            for point_id, parcel_point in parcel_points.groupby('id'):
+                # save predictions and metadata
+                inv_res_data = {
+                    'scene_id': fpath_inv_res.name,
+                    'date': inv_res_date.date(),
+                    'point_id': point_id
+                }
+                # loop over inversion results from different PROSAIL runs
+                for fpath_model in fpath_inv_res.glob('*lutinv*.tiff'):
+                    pred_ds = RasterCollection.from_multi_band_raster(
+                        fpath_model,
+                        vector_features=parcel_gdf
+                    )
+                    pheno_phase_model = fpath_model.name.split('_')[0]
+                    # get pixel values at sampling points
+                    parcel_point_utm = parcel_point.to_crs(pred_ds[pred_ds.band_names[0]].crs)
+                    pred_ds_clipped = pred_ds.clip_bands(
+                        clipping_bounds=parcel_point_utm.geometry.values[0]
+                    )
+
+                    for trait in traits:
+                        inv_res_data[f'{trait}_{pheno_phase_model}'] = \
+                            pred_ds_clipped[trait].reduce(['mean'])[0]['mean']
+                        inv_res_data[f'{trait}_q05_{pheno_phase_model}'] = \
+                            pred_ds_clipped[f'{trait}_q05'].reduce(['mean'])[0]['mean']
+                        inv_res_data[f'{trait}_q95_{pheno_phase_model}'] = \
+                            pred_ds_clipped[f'{trait}_q95'].reduce(['mean'])[0]['mean']
+                    # get the value (error) of the cost function found
+                    try:
+                        inv_res_data[f'error_{pheno_phase_model}'] = \
+                            pred_ds_clipped['median_error'].reduce(['mean'])[0]['mean']
+                    except KeyError:
+                            continue
+
+                    s2_srf_clipped = s2_srf_ds.clip_bands(
+                        clipping_bounds=parcel_point_utm.geometry.values[0]
+                    )
+                    # get the most common SCL class and set the observation to that class
+                    most_common_scl = np.argmax(
+                        np.bincount(s2_srf_clipped['SCL'].values.data.flatten().astype(int))
+                    )
+                    inv_res_data['SCL'] = most_common_scl
+                    sel_keys = [x for x in s2_srf_clipped.band_names if x != 'SCL']
+                    for sel_key in sel_keys:
+                        inv_res_data[sel_key] = s2_srf_clipped[sel_key].reduce(['mean'])[0]['mean']
+
+                    inv_res_data_list.append(inv_res_data)
+
+            res_inv_df = pd.DataFrame(inv_res_data_list)
+            for trait in traits:
+                res_inv_df[f'{trait} (Phenology)'] = res_inv_df[f'{trait}_germination-endoftillering']
+            
+            # add parcel and location name
+            res_inv_df['parcel'] = parcel_name
+            res_inv_df['location'] = location_name
+            large_res_list.append(res_inv_df)
+
+    large_df = pd.concat(large_res_list)
+    return large_df
 
 if __name__ == '__main__':
+
+    ### 2022 data
 
     # directory where weather station and field parcel geometry data is stored
     aux_data_dir = Path('../data/auxiliary')
@@ -464,7 +571,7 @@ if __name__ == '__main__':
         if use_temperature_only: dirname = 'agdds_only'
         res_dir = inv_res_dir.joinpath(dirname)
         res_dir.mkdir(exist_ok=True)
-
+    
         combine_model_results_with_insitu(
             sampling_point_dir=sampling_point_dir,
             field_parcel_dir=field_parcel_dir,
@@ -478,3 +585,32 @@ if __name__ == '__main__':
             plot=False,
             use_temperature_only=use_temperature_only
         )
+
+    ### 2019
+    # add 2019 data. Since we deal with a single observation, we use the known
+    # BBCH status (at stem elongation)
+    sampling_point_dir = aux_data_dir.joinpath('sampling_points_ww_2019')
+    field_parcel_dir = aux_data_dir.joinpath('field_parcels_ww_2019')
+    farm = 'SwissFutureFarm'
+
+    inv_res = Path('../results/lut_based_inversion/SwissFutureFarm_2019')
+    fpath_s2_traits = inv_res.joinpath('')
+
+    sites_2019 = read_site_characteristics(
+        fpath=fpath_site_char,
+        sheet_name='PhenomEn_Sites_2019_short'
+    )
+
+    df_2019 = extract_2019_data(site_char_df=sites_2019, res_dir=inv_res, traits=traits)
+
+    # append to 2022 data
+    for use_temperature_only in use_temperature_only_opts:
+        # directory for storing results
+        dirname = 'agdds_and_s2'
+        if use_temperature_only: dirname = 'agdds_only'
+        res_dir = inv_res_dir.joinpath(dirname)
+        fpath_csv = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
+        df_2022 = pd.read_csv(fpath_csv)
+        df = pd.concat([df_2022, df_2019])
+        # overwrite file with 2022 data
+        df.to_csv(fpath_csv)
