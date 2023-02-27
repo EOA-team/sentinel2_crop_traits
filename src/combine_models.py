@@ -318,13 +318,17 @@ def combine_model_results_with_insitu(
             # get the field parcel geometry so that the correct in-situ observations are selected
             # I know that's ugly
             if parcel_name == 'Parzelle 35': parcel_name = 'Parzelle35'
-            fpath_parcel_geom = field_parcel_dir.joinpath(f'{parcel_name.replace(" ","")}.shp')
+            fpath_parcel_geom = field_parcel_dir.joinpath(
+                location_name
+            ).joinpath(
+                f'{parcel_name.replace(" ","")}.shp'
+            )
             parcel_gdf = gpd.read_file(fpath_parcel_geom)
             # get the corresponding in-situ sampling points
             try:
                 parcel_points = gpd.read_file(
                     next(
-                        sampling_point_dir.joinpath(location_name).glob(f'{parcel_name.lower()}.gpkg')
+                        sampling_point_dir.joinpath(location_name).glob(f'{parcel_name}.gpkg')
                     )
                 )
             except Exception as e:
