@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg']
     data_dir = Path('../results/lut_based_inversion')
-    
+
     cost_functions = {
         'all_phases': 'mae',
         'germination-endoftillering': 'rmse',
