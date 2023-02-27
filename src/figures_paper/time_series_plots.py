@@ -102,8 +102,8 @@ if __name__ == '__main__':
     }
 
     farms = ['Arenenberg', 'SwissFutureFarm', 'Strickhof', 'Witzwil']
-    farm_data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
-    fpath_farms_characteristics = farm_data_dir.joinpath('site_characteristics.ods')
+    farm_data_dir = Path('../../data/auxiliary/field_parcels_ww_2022')
+    fpath_farms_characteristics = Path('../../data/in_situ_traits_2022/site_characteristics.ods')
     farms_characterisitcs = pd.read_excel(fpath_farms_characteristics, sheet_name=f'PhenomEn_Sites_2022_short')
 
     data_list = []
