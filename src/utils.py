@@ -106,11 +106,11 @@ def cumulative_gdds(temp_df: pd.DataFrame, sowing_date: date, harvest_date: date
     _df_crop['gdd_cumsum'] = _df_crop.gdd.cumsum()
     return _df_crop
 
-def read_site_characteristics(fpath: Path) -> pd.DataFrame:
+def read_site_characteristics(fpath: Path, sheet_name='PhenomEn_Sites_2022_short') -> pd.DataFrame:
     """
     loads site-metadata (field calendar)
     """
-    df = pd.read_excel(fpath, engine='odf', sheet_name='PhenomEn_Sites_2022_short')
+    df = pd.read_excel(fpath, engine='odf', sheet_name=sheet_name)
     df['Sowing Date'] = pd.to_datetime(df['Sowing Date'])
     df['Harvest Date'] = pd.to_datetime(df['Harvest Date'])
     return df
