@@ -1,0 +1,370 @@
+phenology [BBCH],greenLAI,Crop,ccc
+25,1.644444444,Winter Wheat,0.876598518336415
+26,2.385777778,Winter Wheat,1.26175834093779
+28,2.316074074,Winter Wheat,1.28145805101356
+28,3.596333333,Winter Wheat,1.60692165162299
+30,3.869222222,Winter Wheat,1.63117810616514
+30,4.561555556,Winter Wheat,2.3159017557812
+32,5.119666667,Winter Wheat,3.0467136335317
+33,6.152555556,Winter Wheat,3.3451444557972
+45,5.847444444,Winter Wheat,3.2757383775288
+58,5.870888889,Winter Wheat,3.1826088667269
+61,6.200888889,Winter Wheat,3.4464540445062
+65,5.502078066,Winter Wheat,3.1785504987282
+69,5.838606027,Winter Wheat,3.1680276302502
+75,5.544074659,Winter Wheat,3.0059972801098
+83,5.371039365,Winter Wheat,2.285914353744
+87,0.761747067,Winter Wheat,0.1387141409007
+26,0.280966667,Winter Wheat,0.1459621835065
+28,1.450777778,Winter Wheat,0.741347444558
+30,3.099111111,Winter Wheat,1.5641213777217
+31,3.826055556,Winter Wheat,1.7902113946524
+32,4.955,Winter Wheat,2.495338
+58,5.931555556,Winter Wheat,3.1360134224572
+60,5.264888889,Winter Wheat,2.8330367111709
+61,6.376888889,Winter Wheat,3.5423617778395
+65,5.383799589,Winter Wheat,2.8647197613069
+69,5.98272587383597,Winter Wheat,2.80284059716022
+85,3.285020906,Winter Wheat,1.0778153592586
+87,0,Winter Wheat,0
+25.8,0.616,Winter Wheat,0.345804148148148
+26,0.934933333333333,Winter Wheat,0.498319466666666
+28,1.4856,Winter Wheat,0.804865066666667
+28,1.897,Winter Wheat,1.03702666666667
+29,3.14366666666667,Winter Wheat,1.56711783333334
+31,3.76416666666667,Winter Wheat,1.95761761111111
+32,4.97266666666667,Winter Wheat,2.84723842962963
+33,5.52533333333334,Winter Wheat,3.10892088888889
+51,6.2082,Winter Wheat,3.3717424
+58,5.739,Winter Wheat,3.171754
+69,6.09366666666667,Winter Wheat,3.30953807407408
+69,6.025,Winter Wheat,3.28764166666667
+73,5.63366666666667,Winter Wheat,2.89570466666667
+77,4.932,Winter Wheat,2.3686752
+89,1.107,Winter Wheat,0.1695186
+92,0,Winter Wheat,0
+13,0.215343888888889,Winter Wheat,0.111643842839506
+26,0.400177777777778,Winter Wheat,0.209746512592592
+27,0.823211111111111,Winter Wheat,0.508415182222222
+28,1.06031111111111,Winter Wheat,0.818937177283949
+29,1.60711111111111,Winter Wheat,0.860447288888888
+29,3.10388888888889,Winter Wheat,1.52925156790124
+30,3.31966666666667,Winter Wheat,1.86897233333334
+31,4.32633333333333,Winter Wheat,2.41611295555556
+57,4.61166666666667,Winter Wheat,2.52053203703704
+71,,Winter Wheat,
+75,5.33981240177352,Winter Wheat,2.86297008483533
+75,1.94949755782466,Winter Wheat,0.662894152912311
+85,0.17704579152113,Winter Wheat,0.03446491408278
+92,,Winter Wheat,
+17,0.26268,Winter Barley,0.108521864
+26,0.541277777777778,Winter Barley,0.241987251851852
+27.5,0.874955555555555,Winter Barley,0.506268727901234
+27.5,1.07633333333333,Winter Barley,0.606190933333332
+29,1.71833333333333,Winter Barley,0.719189324074073
+30,3.24733333333333,Winter Barley,1.43019776296296
+30,3.12866666666667,Winter Barley,1.41061151111111
+41,4.71166666666667,Winter Barley,2.73276666666667
+65,4.503,Winter Barley,2.12251406666667
+83,,Winter Barley,
+89,0,Winter Barley,0
+92,,Winter Barley,
+13,0.171711111,Corn,0.0634129132923
+30,0.207444444,Corn,0.079762388718
+31,0.638688889,Corn,0.2598186400452
+32,1.572333333,Corn,0.779877333168
+51,3.707222222,Corn,1.8917954998866
+63,2.883722222,Corn,1.5032843943286
+71,3.875222222,Corn,1.9639626221096
+83,3.900777778,Corn,2.0369861556716
+83,3.860666667,Corn,2.1295437335172
+85,3.060666667,Corn,1.6426598001789
+85,2.36801374,Corn,1.173824410918
+30,0.427655556,Corn,0.1679831023968
+31,1.014744444,Corn,0.3961562309376
+32,1.785211111,Corn,0.860471755502
+35,2.525,Corn,1.35643
+51,3.589444444,Corn,1.9982437219748
+65,3.376333333,Corn,2.0234365664669
+73,3.401333333,Corn,2.0322966664675
+75,3.607,Corn,2.1926953
+75,3.631444444,Corn,2.2086445108408
+75,3.674,Corn,2.2242396
+83,3.387888889,Corn,1.944648222286
+83,3.229309649,Corn,1.856853048175
+87,3.788481247,Corn,2.0863166227229
+11,0.0710866666666667,Corn,0.016650077037037
+14,0.12513,Corn,0.0349668833333332
+25,0.118953333333333,Corn,0.0359635577777776
+30,0.409033333333333,Corn,0.154587331111111
+30,0.458433333333333,Corn,0.184595822222222
+33,0.820566666666667,Corn,0.368926773333333
+34,1.74533333333333,Corn,0.858005866666665
+51,2.20633333333333,Corn,1.22024942222222
+63,2.66733333333333,Corn,1.50313124444444
+65,2.89866666666667,Corn,1.72915128888889
+67,3.11233333333333,Corn,1.876737
+79,3.37633333333333,Corn,1.9812324
+80,3.043,Corn,1.7046886
+32,4.17,Winter Wheat,2.81475
+31,4.23,Winter Wheat,2.82141
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+32,3.91,Winter Wheat,2.65489
+32,3.29,Winter Wheat,2.14837
+32,3.68,Winter Wheat,2.53184
+32,3.65,Winter Wheat,2.49295
+32,3.79,Winter Wheat,2.52414
+32,3.18,Winter Wheat,2.10834
+32,3.73,Winter Wheat,2.57743
+29,1.78,Winter Wheat,1.11962
+32,3.82,Winter Wheat,2.49446
+32,3.23,Winter Wheat,2.11565
+32,3.18,Winter Wheat,2.06064
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+29,1.69,Winter Wheat,0.99541
+30,2.07,Winter Wheat,1.20888
+30,2.85,Winter Wheat,1.7784
+30,1.88,Winter Wheat,1.18816
+53,2.84,Corn,1.917
+30,2.08,Winter Wheat,1.25216
+30,1.97,Winter Wheat,1.18594
+30,2.75,Winter Wheat,1.6445
+29,1.86,Winter Wheat,1.1811
+30,1.96,Winter Wheat,1.13484
+39,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+30,2.23,Winter Wheat,1.338
+59,3.1,Corn,2.1483
+31,,Winter Wheat,
+30,2.27,Winter Wheat,1.38243
+58,5.9,Winter Barley,3.835
+52,2.65,Winter Barley,1.696
+30,2,Winter Wheat,1.122
+30,2.34,Winter Wheat,1.46484
+52,2.04,Corn,1.39332
+29,1.75,Winter Wheat,1.0115
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+52,3.08,Corn,2.18988
+59,5.94,Winter Barley,4.01544
+52,4.08,Corn,2.74176
+58,5.11,Winter Barley,3.41348
+30,1.4,Winter Wheat,0.7616
+52,1.89,Corn,1.34001
+31,2.65,Winter Wheat,1.59265
+75,3.18,Corn,1.25928
+15,2.77,Winter Barley,1.33514
+31,2.68,Winter Wheat,1.53564
+31,2.94,Winter Wheat,1.62288
+31,2.1,Winter Wheat,1.1718
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+31,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+59,3.1,Corn,2.1049
+79,2.98,Corn,1.29928
+53,1.82,Corn,1.23578
+59,2.15,Corn,1.5136
+59,6.23,Winter Barley,4.00589
+75,3.21,Corn,1.42845
+53,3.2,Corn,2.2112
+53,2.84,Corn,1.95392
+18,1.83,Winter Barley,1.04859
+75,3.27,Corn,1.11507
+31,2.67,Winter Wheat,1.53525
+31,2.48,Winter Wheat,1.32432
+31,2.35,Winter Wheat,1.40765
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+79,4.85,Summer Barley,2.10005
+59,2.57,Winter Barley,1.44948
+59,3.14,Corn,2.14776
+15,2.39,Winter Wheat,1.5057
+31,2.37,Winter Wheat,1.32957
+32,3.35,Summer Wheat,2.1239
+30,1.71,Winter Wheat,0.88407
+15,1.75,Winter Wheat,1.043
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+39,,Winter Wheat,
+79,4.98,Summer Barley,1.83762
+79,3.42,Summer Barley,1.38168
+30,1.73,Winter Wheat,0.87884
+39,,Winter Wheat,
+66,7.34,Summer Barley,4.68292
+76,3.63,Corn,1.38303
+55,0.68,Winter Barley,0.374
+36,1.43,Corn,
+30,1.85,Winter Wheat,0.85655
+31,2.32,Winter Wheat,1.23888
+31,2.13,Winter Wheat,1.09056
+38,1.87,Corn,
+31,2.01,Winter Wheat,0.97686
+17,,Corn,
+31,2.02,Winter Wheat,1.02414
+35,1.77,Corn,
+79,3.98,Summer Barley,1.67956
+45,2.94,Summer Barley,
+66,7.44,Summer Barley,4.9104
+68,6.17,Summer Barley,3.81306
+66,7.9,Summer Barley,5.1508
+66,6.89,Summer Barley,4.38204
+54,1.77,Winter Barley,0.93456
+30,2.05,Winter Wheat,1.3325
+30,1.76,Winter Wheat,0.9152
+30,1.84,Winter Wheat,0.94024
+30,1.32,Winter Wheat,0.69168
+30,2.03,Winter Wheat,0.97237
+30,1.47,Winter Wheat,0.71001
+36,1.87,Corn,
+30,1.51,Winter Wheat,0.86372
+51,0.79,Summer Barley,
+66,7.94,Summer Barley,5.3595
+68,6.29,Summer Barley,3.9627
+66,7.6,Summer Barley,5.0236
+45,2.86,Summer Barley,
+37,1.3,Corn,
+52,2.31,Summer Barley,
+15,0.84,Winter Wheat,0.34104
+17,1.98,Corn,1.28106
+30,2.09,Winter Wheat,1.11606
+30,1.47,Winter Wheat,0.73794
+18,0.86,Corn,
+48,2.09,Summer Barley,
+30,1.52,Winter Wheat,0.66272
+30,1.54,Winter Wheat,0.91938
+66,8.63,Summer Barley,5.60087
+68,6.66,Summer Barley,4.14252
+68,6.81,Summer Barley,4.1541
+48,3.42,Summer Barley,
+45,3.53,Summer Barley,
+37,1.42,Corn,
+30,1.94,Winter Wheat,0.88658
+30,1.4,Winter Wheat,0.7266
+37,1.64,Corn,
+15,1.56,Winter Wheat,0.99996
+66,7.26,Summer Barley,4.63914
+45,2.43,Summer Barley,
+45,2.12,Summer Barley,
+50,2.11,Summer Barley,
+30,1.22,Winter Wheat,0.58194
+17,0.99,Corn,
+17,,Corn,
+30,1.98,Winter Wheat,0.97218
+30,1.22,Winter Wheat,0.61
+18,1.17,Corn,
+16,1.71,Corn,0.96786
+31,1.61,Winter Wheat,0.81144
+18,2.07,Corn,
+50,2.59,Summer Barley,
+29,1.24,Winter Wheat,0.5828
+18,1.88,Corn,
+45,3.28,Summer Barley,
+48,2.25,Summer Barley,
+29,1.61,Winter Wheat,0.85652
+17,1.44,Corn,
+51,1,Summer Barley,
+17,1.43,Corn,
+17,1.28,Corn,
+17,1.45,Corn,
+16,1.65,Corn,1.04445
+18,,Corn,
+17,1.88,Corn,
+17,,Corn,
+18,2.07,Corn,
+18,1.3,Corn,
+17,,Corn,
+37,1.88,Corn,
+51,1.19,Summer Barley,
+18,2.09,Corn,
+16,2.13,Corn,
+51,1.08,Summer Barley,
+16,1.72,Corn,
