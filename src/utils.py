@@ -111,8 +111,10 @@ def read_site_characteristics(fpath: Path, sheet_name='PhenomEn_Sites_2022_short
     loads site-metadata (field calendar)
     """
     df = pd.read_excel(fpath, engine='odf', sheet_name=sheet_name)
-    df['Sowing Date'] = pd.to_datetime(df['Sowing Date'])
-    df['Harvest Date'] = pd.to_datetime(df['Harvest Date'])
+    if 'Sowing Date' in df.columns:
+        df['Sowing Date'] = pd.to_datetime(df['Sowing Date'])
+    if 'Harvest Date' in df.columns:
+        df['Harvest Date'] = pd.to_datetime(df['Harvest Date'])
     return df
 
 def get_farms(data_dir: Path, farms: List[str], year: int) -> Dict[str, gpd.GeoDataFrame]:
