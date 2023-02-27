@@ -55,26 +55,26 @@ def validate_data(
     df_all = df.copy()
     df_pheno = df.copy()
 
-    try:
-        # filter out data points where the predicted trait value is outside physical bounds
-        df_all = df_all[(df_all[trait] >= trait_limits.lower) & (df_all[trait] <= trait_limits.upper)]
-        pred_unc_all = df_all[f'Uncertainty_{trait}_all']
-        pred_unc_all = df_all[trait] * pred_unc_all * 0.01
-        df_pheno = df_pheno[(df_pheno[trait] >= trait_limits.lower) & (df_pheno[trait] <= trait_limits.upper)]
-        pred_unc_pheno = df_pheno[f'Uncertainty_{trait}_all']
-        pred_unc_pheno = df_pheno[trait] * pred_unc_pheno * 0.01
-    except KeyError:
-        # construct the baseline uncertainty
-        pred_unc_all = [
-            df_all[f'{trait}_all'] - df_all[f'{trait}_q05_all'],
-            df_all[f'{trait}_q95_all'] - df_all[f'{trait}_all']
-        ]
-        pred_unc_all = None
-        pred_unc_pheno = [
-            df_pheno[f'{trait} (Phenology)'] - df_pheno[f'{trait}_q05 (Phenology)'], 
-            df_pheno[f'{trait}_q95 (Phenology)'] - df_pheno[f'{trait} (Phenology)']
-        ]
-        pred_unc_pheno = None
+    # try:
+    #     # filter out data points where the predicted trait value is outside physical bounds
+    #     df_all = df_all[(df_all[trait] >= trait_limits.lower) & (df_all[trait] <= trait_limits.upper)]
+    #     pred_unc_all = df_all[f'Uncertainty_{trait}_all']
+    #     pred_unc_all = df_all[trait] * pred_unc_all * 0.01
+    #     df_pheno = df_pheno[(df_pheno[trait] >= trait_limits.lower) & (df_pheno[trait] <= trait_limits.upper)]
+    #     pred_unc_pheno = df_pheno[f'Uncertainty_{trait}_all']
+    #     pred_unc_pheno = df_pheno[trait] * pred_unc_pheno * 0.01
+    # except KeyError:
+    #     # construct the baseline uncertainty
+    #     pred_unc_all = [
+    #         df_all[f'{trait}_all'] - df_all[f'{trait}_q05_all'],
+    #         df_all[f'{trait}_q95_all'] - df_all[f'{trait}_all']
+    #     ]
+    #     pred_unc_all = None
+    #     pred_unc_pheno = [
+    #         df_pheno[f'{trait} (Phenology)'] - df_pheno[f'{trait}_q05 (Phenology)'], 
+    #         df_pheno[f'{trait}_q95 (Phenology)'] - df_pheno[f'{trait} (Phenology)']
+    #     ]
+    #     pred_unc_pheno = None
 
     _, error_stats_all = plot_prediction(
         true=df_all[trait],
@@ -173,14 +173,32 @@ def validate_data(
 
 if __name__ == '__main__':
 
-    # paths to in-situ trait measurements
-    trait_dir = Path('../data/in_situ_traits_2022')
     traits = ['lai', 'ccc']
 
-    # in-situ trait values
-    fpath_insitu_lai = trait_dir.joinpath('in-situ_glai_all_measurements_phenomen_only_gdd.gpkg')
-    fpath_insitu_ccc = trait_dir.joinpath('in-situ_ccc_all_measurements_gdd.gpkg')
-    fpath_insitu_bbch = trait_dir.joinpath('in-situ_bbch_all_ratings_gdd.gpkg')
+    # paths to in-situ trait measurements from 2019 and 2022
+
+    years = [2019, 2022]
+
+    lai_list = []
+    ccc_list = []
+    for year in years:
+        trait_dir = Path(f'../data/in_situ_traits_{year}')
+        # in-situ trait values
+        fpath_insitu_lai = trait_dir.joinpath('in-situ_glai.gpkg')
+        fpath_insitu_ccc = trait_dir.joinpath('in-situ_ccc.gpkg')
+        lai = gpd.read_file(fpath_insitu_lai)
+        if year == 2019:
+            lai['gdd_cumsum'] = 999
+            
+        lai_list.append(lai)
+        ccc = gpd.read_file(fpath_insitu_ccc)
+        ccc_list.append(ccc)
+
+    # combine traits from different years
+    lai_all = pd.concat(lai_list)
+    ccc_all = pd.concat(ccc_list)
+
+    fpath_insitu_bbch = Path('../data/in_situ_traits_2022').joinpath('in-situ_bbch.gpkg')
     bbch_insitu = gpd.read_file(fpath_insitu_bbch)
 
     # traits from inversion
@@ -193,13 +211,13 @@ if __name__ == '__main__':
             'trait_name': 'Green Leaf Area Index',
             'trait_unit': r'$m^2$ $m^{-2}$',
             'trait_limits': TraitLimits(0,8),
-            'orig_trait_data': fpath_insitu_lai
+            'orig_trait_data': lai_all
         },
         'ccc': {
             'trait_name': 'Canopy Chlorophyll Content',
             'trait_unit': r'$g$ $m^{-2}$',
             'trait_limits': TraitLimits(0,4),
-            'orig_trait_data': fpath_insitu_ccc
+            'orig_trait_data': ccc_all
         }
     }
 
@@ -213,17 +231,14 @@ if __name__ == '__main__':
             out_dir = fpath_inv_res.parent.joinpath(f'validation_{trait}')
             out_dir.mkdir(exist_ok=True)
             # join in-situ and inversion data
-            insitu_trait_df = gpd.read_file(trait_settings[trait]['orig_trait_data'])
+            insitu_trait_df = trait_settings[trait]['orig_trait_data']
             del trait_settings[trait]['orig_trait_data']
             fpath_joined_res = out_dir.joinpath(f'inv_res_joined_with_insitu_{trait}.csv')
 
             # join S2 and in-situ data are read data from existing file
-            if not fpath_joined_res.exists():
-                joined = join_with_insitu(insitu_trait_df, bbch_insitu, inv_res_df, [trait])
-                joined.to_csv(fpath_joined_res)
-            else:
-                joined = pd.read_csv(fpath_joined_res)
-    
+            joined = join_with_insitu(insitu_trait_df, bbch_insitu, inv_res_df, [trait])
+            joined.to_csv(fpath_joined_res)
+
             validate_data(
                 _df=joined,
                 out_dir=out_dir,
