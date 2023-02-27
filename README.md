@@ -17,12 +17,16 @@ For re-running the entire workflow (all results are provided, see below)
 * [combine_models.py](src/combine_models.py): Implements the phenological model and combines PROSAIL outputs
 * [validate_traits.py](src/validate_traits.py): Carries out the trait validation against in-situ data
 
+Moreover, all but one figure (the overview map that was created in QGIS) can be recreated using [these Python scripts](src/figures_paper).
+
 ### Data
 In [data](data) the in-situ trait values, field parcel geometries, location of sampling points where the traits were measured, field calendars and spectral response functions of Sentinel-2 can be found.
 
 ### Results
 In [results](results) we deliver the extracted Sentinel-2 data and results of the PROSAIL inversion (including lookup-tables). This is mainly due to computational demands of running PROSAIL in forward mode to allow users with limited computing resources to check our methodology and reproduce our main findings.
 
+In results, also all [figures](results/Figures) of the paper can be found.
+ 
 ## OS and Software Requirements
 
 The code was tested and run completely on Fedora 35 using Python 3.10. In theory, it should also run on other operating systems and Python versions but we never verified it.
