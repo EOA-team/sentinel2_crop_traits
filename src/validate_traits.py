@@ -173,8 +173,8 @@ def validate_data(
 
 if __name__ == '__main__':
 
-    # paths to in-situ trait measurments
-    trait_dir = Path('../in-situ_traits_2022')
+    # paths to in-situ trait measurements
+    trait_dir = Path('../data/in_situ_traits_2022')
     traits = ['lai', 'ccc']
 
     # in-situ trait values
