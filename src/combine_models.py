@@ -441,8 +441,8 @@ if __name__ == '__main__':
     field_parcel_dir = aux_data_dir.joinpath('field_parcels_ww_2022')
 
     # field calendars
-    trait_dir = Path('../data/in-situ_traits_2022')
-    fpath_site_char = trait_dir.parent.joinpath('site_characteristics.ods')
+    trait_dir = Path('../data/in_situ_traits_2022')
+    fpath_site_char = trait_dir.joinpath('site_characteristics.ods')
     site_char_df = read_site_characteristics(fpath=fpath_site_char)
 
     # directory where inversion results are stored (stored by S2 acquisitions)
