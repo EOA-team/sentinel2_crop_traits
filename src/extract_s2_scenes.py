@@ -245,13 +245,7 @@ def get_s2_spectra(
 
 if __name__ == '__main__':
 
-    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
-    year = 2022
-    farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
-
-    # get field parcel geometries organized by farm
-    farm_gdf_dict = get_farms(data_dir, farms, year)
-
+    ### global setup
     out_dir = Path('../results').joinpath('lut_based_inversion')
     out_dir.mkdir(exist_ok=True)
 
@@ -276,6 +270,53 @@ if __name__ == '__main__':
         Filter('cloudy_pixel_percentage','<', 50),
         Filter('processing_level', '==', 'Level-2A')
     ]
+
+    #######################################################################
+
+    ### extraction for 2019
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    year = 2019
+    farms = ['SwissFutureFarm']
+
+    # get field parcel geometries organized by farm
+    farm_gdf_dict = get_farms(data_dir, farms, year)
+
+    # loop over farms
+    for farm, geom in farm_gdf_dict.items():
+        logger.info(f'Working on {farm}')
+        # S2 configuration (for data extraction and pre-processing)
+        feature = Feature.from_geoseries(gds=geom.geometry)
+        s2_mapper_config = MapperConfigs(
+            collection='sentinel2-msi',
+            time_start=datetime(year,4,10),
+            time_end=datetime(year,4,21),
+            feature=feature,
+            metadata_filters=metadata_filters
+        )
+
+        output_dir_farm = out_dir.joinpath(f'{farm}_{year}')
+        output_dir_farm.mkdir(exist_ok=True)
+        try:
+            get_s2_spectra(
+                output_dir=output_dir_farm,
+                lut_params_dir=lut_params_dir,
+                s2_mapper_config=s2_mapper_config,
+                rtm_lut_config=rtm_lut_config,
+                traits=traits
+            )
+        except Exception as e:
+            logger.error(f'Farm {farm}: {e}')
+            continue
+
+        logger.info(f'Finished working on {farm}')
+
+    ### extraction for 2022
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    year = 2022
+    farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
+
+    # get field parcel geometries organized by farm
+    farm_gdf_dict = get_farms(data_dir, farms, year)
 
     # loop over farms
     for farm, geom in farm_gdf_dict.items():
