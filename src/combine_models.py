@@ -497,7 +497,7 @@ def extract_2019_data(
             inv_res_date = pd.to_datetime(fpath_inv_res.name.split('_')[2][0:8])
 
             # loop over pixels and save inversion results and spectral data
-            for point_id, parcel_point in parcel_points.groupby('Plot'):
+            for point_id, parcel_point in parcel_points.groupby('sample_id'):
                 # save predictions and metadata
                 inv_res_data = {
                     'scene_id': fpath_inv_res.name,
@@ -552,6 +552,7 @@ def extract_2019_data(
             # add parcel and location name
             res_inv_df['parcel'] = parcel_name
             res_inv_df['location'] = location_name
+            res_inv_df['gdd_cumsum'] = 999 # this is a placeholder
             large_res_list.append(res_inv_df)
 
     large_df = pd.concat(large_res_list)
