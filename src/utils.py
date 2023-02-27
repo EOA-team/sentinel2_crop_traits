@@ -163,10 +163,7 @@ def join_with_insitu(
     # thermal time scale
     for location_parcel, inv_res_parcel_point in inv_res_df.groupby(['location', 'parcel', 'point_id']):
         location_name, parcel_name, point_id = location_parcel
-        # I know that's ugly
-        if parcel_name == 'Parzelle35':
-            parcel_name = 'Parzelle 35'
-        
+
         # get insitu measurements and sort them by cumulative GDDs
         insitu_parcel_point = insitu_df[
             (insitu_df.location == location_name) & \
