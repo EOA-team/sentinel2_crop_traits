@@ -155,7 +155,7 @@ def invert_scenes(
 
 if __name__ == '__main__':
 
-    farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg']
+    farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg', 'SwissFutureFarm_2019']
     data_dir = Path('../results/lut_based_inversion')
 
     cost_functions = {
