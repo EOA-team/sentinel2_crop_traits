@@ -157,17 +157,21 @@ def join_with_insitu(
     :returns:
         joined dataframe
     """
-
+    insitu_df.parcel = insitu_df.parcel.apply(lambda x: 'Parzelle35' if x == 'Parzelle 35' else x)
     joined_res = []
     # loop over locations, parcels and sampling points to join results on
     # thermal time scale
     for location_parcel, inv_res_parcel_point in inv_res_df.groupby(['location', 'parcel', 'point_id']):
         location_name, parcel_name, point_id = location_parcel
-
+        # cast point id to int if possible -> otherwise the merge misses records
+        try:
+            point_id = int(point_id)
+        except ValueError:
+            pass
         # get insitu measurements and sort them by cumulative GDDs
         insitu_parcel_point = insitu_df[
             (insitu_df.location == location_name) & \
-            (insitu_df.parcel == parcel_name) & \
+            (insitu_df.parcel == parcel_name)  & \
             (insitu_df.point_id == point_id)
         ].copy()
         insitu_parcel_point.sort_values(by='gdd_cumsum', inplace=True)
@@ -187,6 +191,11 @@ def join_with_insitu(
             (bbch_insitu.parcel == parcel_name) & \
             (bbch_insitu.point_id == point_id)
         ].copy()
+        # in 2019, we do not consider the BBCH
+        if bbch_insitu_parcel_point.empty:
+            joined_res.append(merged_tmp)
+            continue
+
         bbch_insitu_parcel_point.sort_values(by='gdd_cumsum', inplace=True)
         merged = pd.merge_asof(
             left=merged_tmp,
@@ -198,7 +207,16 @@ def join_with_insitu(
         )
         joined_res.append(merged)
         
-    return pd.concat(joined_res)
+    df = pd.concat(joined_res)
+    # return only those records where in-situ data is available
+    df.dropna(subset=traits, inplace=True)
+    # drop duplicates resulting from merge process
+    df.drop_duplicates(
+        subset=['parcel', 'date_insitu', 'gdd_cumsum', 'location', 'point_id'],
+        inplace=True,
+        keep='first'
+    )
+    return df
 
 def plot_prediction(
         true: np.ndarray,
