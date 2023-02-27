@@ -128,9 +128,9 @@ def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
 
 if __name__ == '__main__':
 
-    # TODO: update paths, add data and test code
-    data_dir = Path('../../data/ccc_glai_relationship')
+    data_dir = Path('../../data/auxiliary/glai_ccc_relationship')
     out_dir = Path('../../results/Figures')
+    out_dir.mkdir(exist_ok=True)
     fpath_data = data_dir.joinpath('cereals_ccc_glai.csv')
     df = pd.read_csv(fpath_data)
 
