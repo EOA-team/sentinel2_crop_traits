@@ -284,8 +284,8 @@ if __name__ == '__main__':
         feature = Feature.from_geoseries(gds=geom.geometry)
         s2_mapper_config = MapperConfigs(
             collection='sentinel2-msi',
-            time_start=datetime(2022,3,1),
-            time_end=datetime(2022,7,31),
+            time_start=datetime(year,3,1),
+            time_end=datetime(year,7,31),
             feature=feature,
             metadata_filters=metadata_filters
         )
