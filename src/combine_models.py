@@ -435,13 +435,13 @@ def combine_model_results_with_insitu(
 if __name__ == '__main__':
 
     # directory where weather station and field parcel geometry data is stored
-    aux_data_dir = Path('../auxiliary')
+    aux_data_dir = Path('../data/auxiliary')
     meteo_data_dir = aux_data_dir.joinpath('Meteo')
     sampling_point_dir = aux_data_dir.joinpath('sampling_points_ww_2022')
     field_parcel_dir = aux_data_dir.joinpath('field_parcels_ww_2022')
 
     # field calendars
-    trait_dir = Path('../in-situ_traits_2022')
+    trait_dir = Path('../data/in-situ_traits_2022')
     fpath_site_char = trait_dir.parent.joinpath('site_characteristics.ods')
     site_char_df = read_site_characteristics(fpath=fpath_site_char)
 
