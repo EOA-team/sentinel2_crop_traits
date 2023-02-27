@@ -208,8 +208,6 @@ def join_with_insitu(
         joined_res.append(merged)
         
     df = pd.concat(joined_res)
-    # return only those records where in-situ data is available
-    df.dropna(subset=traits, inplace=True)
     # drop duplicates resulting from merge process
     df.drop_duplicates(
         subset=['parcel', 'date_insitu', 'gdd_cumsum', 'location', 'point_id'],
