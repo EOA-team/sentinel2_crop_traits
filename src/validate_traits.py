@@ -21,6 +21,7 @@ from utils import (
 )
 
 mpl.rc('font', size=16)
+plt.style.use('bmh')
 
 def validate_data(
     _df: pd.DataFrame,
@@ -55,27 +56,6 @@ def validate_data(
     df_all = df.copy()
     df_pheno = df.copy()
 
-    # try:
-    #     # filter out data points where the predicted trait value is outside physical bounds
-    #     df_all = df_all[(df_all[trait] >= trait_limits.lower) & (df_all[trait] <= trait_limits.upper)]
-    #     pred_unc_all = df_all[f'Uncertainty_{trait}_all']
-    #     pred_unc_all = df_all[trait] * pred_unc_all * 0.01
-    #     df_pheno = df_pheno[(df_pheno[trait] >= trait_limits.lower) & (df_pheno[trait] <= trait_limits.upper)]
-    #     pred_unc_pheno = df_pheno[f'Uncertainty_{trait}_all']
-    #     pred_unc_pheno = df_pheno[trait] * pred_unc_pheno * 0.01
-    # except KeyError:
-    #     # construct the baseline uncertainty
-    #     pred_unc_all = [
-    #         df_all[f'{trait}_all'] - df_all[f'{trait}_q05_all'],
-    #         df_all[f'{trait}_q95_all'] - df_all[f'{trait}_all']
-    #     ]
-    #     pred_unc_all = None
-    #     pred_unc_pheno = [
-    #         df_pheno[f'{trait} (Phenology)'] - df_pheno[f'{trait}_q05 (Phenology)'], 
-    #         df_pheno[f'{trait}_q95 (Phenology)'] - df_pheno[f'{trait} (Phenology)']
-    #     ]
-    #     pred_unc_pheno = None
-
     _, error_stats_all = plot_prediction(
         true=df_all[trait],
         pred=df_all[f'{trait}_all'],
@@ -83,7 +63,7 @@ def validate_data(
         trait_unit=trait_unit,
         trait_lims=trait_limits,
         ax=ax[0],
-        pred_unc=pred_unc_all
+        pred_unc=None
     )
     error_stats_all['phenology_considered'] = False
     ax[0].set_title('Inversion WITHOUT phenological constraints')
@@ -95,7 +75,7 @@ def validate_data(
         trait_unit=trait_unit,
         trait_lims=trait_limits,
         ax=ax[1],
-        pred_unc=pred_unc_pheno
+        pred_unc=None
     )
     error_stats_pheno['phenology_considered'] = True
     ax[1].set_title('Inversion WITH phenological constraints')
@@ -189,9 +169,20 @@ if __name__ == '__main__':
         lai = gpd.read_file(fpath_insitu_lai)
         if year == 2019:
             lai['gdd_cumsum'] = 999
-            
+            lai['point_id'] = lai.Plot.apply(lambda x: '_'.join(str(x).split('_')[0:2]))
+            lai['parcel'] = lai.field
+            lai['genotype'] = 'Arnold'
+            lai['location'] = 'SwissFutureFarm'
         lai_list.append(lai)
+
         ccc = gpd.read_file(fpath_insitu_ccc)
+        if year == 2019:
+            ccc['gdd_cumsum'] = 999
+            ccc['point_id'] = ccc.Plot.apply(lambda x: '_'.join(str(x).split('_')[0:2]))
+            ccc['parcel'] = ccc.field
+            ccc['genotype'] = 'Arnold'
+            ccc['location'] = 'SwissFutureFarm'
+            ccc['ccc'] = ccc['CCC [g/m2]']
         ccc_list.append(ccc)
 
     # combine traits from different years
@@ -206,28 +197,28 @@ if __name__ == '__main__':
     sub_dirs = ['agdds_and_s2', 'agdds_only']
 
     # validate traits
-    trait_settings = {
-        'lai': {
-            'trait_name': 'Green Leaf Area Index',
-            'trait_unit': r'$m^2$ $m^{-2}$',
-            'trait_limits': TraitLimits(0,8),
-            'orig_trait_data': lai_all
-        },
-        'ccc': {
-            'trait_name': 'Canopy Chlorophyll Content',
-            'trait_unit': r'$g$ $m^{-2}$',
-            'trait_limits': TraitLimits(0,4),
-            'orig_trait_data': ccc_all
-        }
-    }
-
     for sub_dir in sub_dirs:
 
         fpath_inv_res = inv_res_dir.joinpath(sub_dir).joinpath('inv_res_gdd_insitu_points.csv')
         inv_res_df = pd.read_csv(fpath_inv_res)
 
+        trait_settings = {
+            'lai': {
+                'trait_name': 'Green Leaf Area Index',
+                'trait_unit': r'$m^2$ $m^{-2}$',
+                'trait_limits': TraitLimits(0,8),
+                'orig_trait_data': lai_all
+            },
+            'ccc': {
+                'trait_name': 'Canopy Chlorophyll Content',
+                'trait_unit': r'$g$ $m^{-2}$',
+                'trait_limits': TraitLimits(0,4),
+                'orig_trait_data': ccc_all
+            }
+        }
+
         for trait in traits:
-    
+
             out_dir = fpath_inv_res.parent.joinpath(f'validation_{trait}')
             out_dir.mkdir(exist_ok=True)
             # join in-situ and inversion data
