@@ -442,8 +442,24 @@ def combine_model_results_with_insitu(
         fname = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
         large_df.to_csv(fname)
 
-# TODO: include logic for 2019 data
-def extract_2019_data(site_char_df: pd.DataFrame, res_dir: Path, traits: List[str]):
+def extract_2019_data(
+    site_char_df: pd.DataFrame,
+    res_dir: Path,
+    traits: List[str]
+) -> pd.DataFrame:
+    """
+    Extract data from 2019 field campaign (single S2 scene).
+
+    :param site_char_df:
+        site characteristics for 2019 (SwissFutureFarm)
+    :param res_dir:
+        directory with inversion results
+    :param traits:
+        list of traits to process
+    :returns:
+        DataFrame with extracted trait values to be appended to
+        2022 data
+    """
     # loop over sites
     large_res_list = []
     parcels = site_char_df.groupby('Parcel')
