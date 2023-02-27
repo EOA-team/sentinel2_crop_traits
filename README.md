@@ -11,10 +11,10 @@ This repository contains the Python code and data required to re-run the analysi
 The Python source code can be found in [src](src). It extracts the Sentinel-2 data, runs the PROSAIL simulations, performs the inversion for trait retrieval, implements the phenology model and generates the figures shown in the paper.
 For re-running the entire workflow (all results are provided, see below)
 
-* [extract_s2_scenes.py](extract_s2_scenes.py): Extracts the Sentinel-2 surface reflectance data and runs PROSAIL in forward mode for the field parcel geometries provided
-* [invert_s2_scenes.py](invert_s2_scenes.py): Carries out the inversion of PROSAIL to derive the functional traits
-* [combine_models.py](combine_models.py): Implements the phenological model and combines PROSAIL outputs
-* [validate_traits.py](validate_traits.py): Carries out the trait validation against in-situ data
+* [extract_s2_scenes.py](src/extract_s2_scenes.py): Extracts the Sentinel-2 surface reflectance data and runs PROSAIL in forward mode for the field parcel geometries provided
+* [invert_s2_scenes.py](src/invert_s2_scenes.py): Carries out the inversion of PROSAIL to derive the functional traits
+* [combine_models.py](src/combine_models.py): Implements the phenological model and combines PROSAIL outputs
+* [validate_traits.py](src/validate_traits.py): Carries out the trait validation against in-situ data
 
 ### Data
 In [data](data) the in-situ trait values, field parcel geometries, location of sampling points where the traits were measured, field calendars and spectral response functions of Sentinel-2 can be found.
