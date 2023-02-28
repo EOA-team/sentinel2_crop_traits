@@ -17,7 +17,7 @@ For re-running the entire workflow (all results are provided, see below)
 * [combine_models.py](src/combine_models.py): Implements the phenological model and combines PROSAIL outputs
 * [validate_traits.py](src/validate_traits.py): Carries out the trait validation against in-situ data
 
-Moreover, all but one figure (the overview map that was created in QGIS) can be recreated using [these Python scripts](src/figures_paper).
+Moreover, all but two figures (the overview map that was created in QGIS, and the workflow figure that was handcrafted in LibreOffice) can be recreated using [these Python scripts](src/figures_paper).
 
 ### Data
 In [data](data) the in-situ trait values, field parcel geometries, location of sampling points where the traits were measured, field calendars and spectral response functions of Sentinel-2 can be found.
