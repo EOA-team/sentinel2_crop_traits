@@ -31,10 +31,12 @@ In results, also all [figures](results/Figures) of the paper can be found.
 
 The code was tested and run completely on Fedora 35 using Python 3.10. In theory, it should also run on other operating systems and Python versions but we never verified it.
 
-All requirements to execute the scripts can be found in the [requirements.txt](requirements.txt) file. To install we recommend to create a clean Python virtual environment. The steps below show how to do the installation using `pip` and `virtualenv` on Linux:
+All requirements to execute the scripts can be found in the [requirements.txt](requirements.txt) file. To install we recommend to create a clean Python virtual environment. The steps below show how to do the installation using `git`, `pip` and `venv` on Linux:
 
 ```bash
-virtualenv s2_crop_traits
-source s2_crop_traits/bin/activate
+git clone https://github.com/EOA-team/sentinel2_crop_traits.git
+cd sentinel2_crop_traits
+python -m venv my_venv
+source my_venv/bin/activate
 pip install -r requirements.txt
 ```
