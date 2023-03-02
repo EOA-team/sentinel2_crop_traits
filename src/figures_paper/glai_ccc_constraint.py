@@ -100,8 +100,8 @@ def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
     f, ax = plt.subplots(figsize=(10,10))
     sns.scatterplot(x='greenLAI', y='ccc', hue='growth_class', style='growth_class', data=df, ax=ax,
                     palette=['darkblue', 'orange'], hue_order=['before flowering', 'after flowering'])
-    ax.set_ylabel('Empirical Canopy Chlorophyll Content [$g$ $m^{-2}$]', fontsize=16)
-    ax.set_xlabel('Empirical Green Leaf Area Index [$m^2$ $m^{-2}$]', fontsize=16)
+    ax.set_ylabel('In-situ Canopy Chlorophyll Content [$g$ $m^{-2}$]', fontsize=16)
+    ax.set_xlabel('In-situ Green Leaf Area Index [$m^2$ $m^{-2}$]', fontsize=16)
     sns.lineplot(x=glai_linspace, y=regr_line_all, ax=ax,
                  label=f'Empirical Regression',
                  color='grey', linestyle='dashed', linewidth=2
