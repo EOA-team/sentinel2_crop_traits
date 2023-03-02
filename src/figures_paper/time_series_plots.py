@@ -129,12 +129,12 @@ if __name__ == '__main__':
     sns.lineplot(x='sensing_date', y='q50', hue='parcel', data=df, ax=ax[0], legend=False,
                  marker='x')
     sns.lineplot(x='agdd', y='q50', hue='parcel', data=df, ax=ax[1], marker='x')
-    ax[0].set_xlabel('')
+    ax[0].set_xlabel('Date (YYYY-MM)')
     ax[0].set_ylabel(r'Median GLAI [$m^2$ $m^{-2}$]')
-    ax[0].set_title('Calendar Dates')
+    ax[0].set_title('(a) Calendar Dates')
     plt.setp(ax[0].xaxis.get_majorticklabels(), rotation=45)
-    ax[1].set_title('AGDDs')
-    ax[1].set_xlabel('')
+    ax[1].set_title('(b) Thermal Time')
+    ax[1].set_xlabel(r'Accumulated Growing Degree Days [$deg$ $C$]')
     plt.setp(ax[1].xaxis.get_majorticklabels(), rotation=45)
     f.savefig(out_dir.joinpath('ts_dates_agdds.png'))
 
