@@ -303,11 +303,11 @@ def plot_prediction(
     # add error stats to plot
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     if trait_name == 'Green Leaf Area Index':
-        ax.text(5, 0.2, err_stats_str, bbox=props)
+        ax.text(4, 0.25, err_stats_str, bbox=props)
     elif trait_name == 'Leaf Chlorophyll a+b Content':
         ax.text(50, 2, err_stats_str, bbox=props)
     elif trait_name == 'Canopy Chlorophyll Content':
-        ax.text(2.5, 0.2, err_stats_str, bbox=props)
+        ax.text(2.1, 0.25, err_stats_str, bbox=props)
 
     return f, error_stats
 

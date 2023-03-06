@@ -12,7 +12,7 @@ from pathlib import Path
 from utils import plot_prediction, TraitLimits
 
 plt.style.use('bmh')
-mpl.rc('font', size=16)
+mpl.rc('font', size=20)
 
 trait_settings = {
     'lai': {
