@@ -2,7 +2,7 @@
 
 This repository contains the Python code and data required to re-run the analysis and results presented in
 
-> **_PAPER:_**  Graf, L.V, Merz, Q.M, Walter, A., Aasen, H. (2023) "In-Season Retrieval of Winter Wheat Functional Traits and Phenology from Sentinel-2 Imagery and Field Phenotyping". *Under review*".
+> **_PAPER:_**  Graf, L.V, Merz, Q.M, Walter, A., Aasen, H. (2023) "Insights from field phenotyping improve satellite remote sensing based in-season estimation of winter wheat growth and phenology". *Under review*".
 
 The data used in the study and made available in this repository is the result of multi-year, labor-intense work in the field and laboratory conducted by teams at [ETH Zurich Crop Science](https://kp.ethz.ch/), the [School of Agircultural, Forest and Food Sciences, HAFL](https://www.bfh.ch/hafl/en/) and the [Division of Agroecology and Environment at Agroscope Reckenholz](https://www.agroscope.admin.ch/agroscope/en/home/about-us/organization/competence-divisions-strategic-research-divisions/agroecology-environment.html). A [list of contributors](data/AUTHORS.txt) is provided.
 
