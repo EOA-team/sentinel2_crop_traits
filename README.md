@@ -4,6 +4,16 @@ This repository contains the Python code and data required to re-run the analysi
 
 > **_PAPER:_**  Graf, L.V, Merz, Q.M, Walter, A., Aasen, H. (2023) "In-Season Retrieval of Winter Wheat Functional Traits and Phenology from Sentinel-2 Imagery and Field Phenotyping". *Under review*".
 
+The data used in the study and made available in this repository is the result of multi-year, labor-intense work in the field and laboratory conducted by teams at [ETH Zurich Crop Science](https://kp.ethz.ch/), the [School of Agircultural, Forest and Food Sciences, HAFL](https://www.bfh.ch/hafl/en/) and the [Division of Agroecology and Environment at Agroscope Reckenholz](https://www.agroscope.admin.ch/agroscope/en/home/about-us/organization/competence-divisions-strategic-research-divisions/agroecology-environment.html). A [list of contributors](data/AUTHORS.txt) is provided.
+
+We therefore kindly ask you to **acknowledge our work** by
+
+* **citing** our research properly whenever you use the data and/or methods presented here
+* leave a **star on GitHub** and/or fork our repository
+
+This helps us to continue the labor and cost-intensive process of data acquisition, preparation and, ultimately, publication to benefit science and society.
+
+If your work relies substantially on our data please also [get in touch with us](https://www.eoa-team.net/) and consider offering co-authorship.
 
 ## Content
 
@@ -21,6 +31,8 @@ Moreover, all but two figures (the overview map that was created in QGIS, and th
 
 ### Data
 In [data](data) the in-situ trait values, field parcel geometries, location of sampling points where the traits were measured, field calendars and spectral response functions of Sentinel-2 can be found.
+
+Please given **proper credit** of our work. See [our guidelines](data/README.md) and [list of contributors](data/AUTHORS.txt) for more details.
 
 ### Results
 In [results](results) we deliver the extracted Sentinel-2 data and results of the PROSAIL inversion (including lookup-tables). This is mainly due to computational demands of running PROSAIL in forward mode to allow users with limited computing resources to check our methodology and reproduce our main findings.
