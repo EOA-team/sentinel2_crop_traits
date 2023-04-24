@@ -242,6 +242,7 @@ def glai_ccc_constraint(lut_df: pd.DataFrame) -> pd.DataFrame:
     cab_samples = ccc_samples / glai * 100
     out_df['cab'] = cab_samples
 
+    # TODO: use this code to produce a figure for the paper
     # import matplotlib.pyplot as plt
     # import seaborn as sns
     # plt.style.use('seaborn-darkgrid')
@@ -318,6 +319,7 @@ def green_is_valid(wvls: np.ndarray, spectrum: np.ndarray) -> bool:
     else:
         return True
 
+    # TODO: use this code to produce a figure for the paper
     # import matplotlib.pyplot as plt
     # plt.style.use('seaborn-darkgrid')
     # plt.plot(wvls[green_wvls_idx[0]:green_wvls_idx[1]], green_spectrum)

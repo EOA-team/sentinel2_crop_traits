@@ -218,28 +218,39 @@ def get_s2_spectra(
             # generate lookup-table for the current angles
             fpath_lut = res_dir_scene.joinpath(f'{pheno_phases}_{trait_str}_lut.pkl')
             # if LUT exists, continue, else generate it
-            if not fpath_lut.exists():
-                lut_inp = rtm_lut_config.copy()
-                lut_inp.update(angle_dict)
-                lut_inp['lut_params'] = lut_params_pheno
-                lut = generate_lut(**lut_inp)
-                # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
-                if 'ccc' in traits:
-                    lut['ccc'] = lut['lai'] * lut['cab']
-                    # convert to g m-2 as this is the more common unit
-                    # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
-                    lut['ccc'] *= 1e-2
-            else:
-                continue
-    
+            # if not fpath_lut.exists():
+            #     lut_inp = rtm_lut_config.copy()
+            #     lut_inp.update(angle_dict)
+            #     lut_inp['lut_params'] = lut_params_pheno
+            #     lut = generate_lut(**lut_inp)
+            #     # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
+            #     if 'ccc' in traits:
+            #         lut['ccc'] = lut['lai'] * lut['cab']
+            #         # convert to g m-2 as this is the more common unit
+            #         # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
+            #         lut['ccc'] *= 1e-2
+            # else:
+            #     continue
+
+            lut_inp = rtm_lut_config.copy()
+            lut_inp.update(angle_dict)
+            lut_inp['lut_params'] = lut_params_pheno
+            lut = generate_lut(**lut_inp)
+            # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
+            if 'ccc' in traits:
+                lut['ccc'] = lut['lai'] * lut['cab']
+                # convert to g m-2 as this is the more common unit
+                # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
+                lut['ccc'] *= 1e-2
+
             # prepare LUT for model training
             lut = lut[band_selection + traits].copy()
             lut.dropna(inplace=True)
     
             # save LUT to file
-            if not fpath_lut.exists():
-                with open(fpath_lut, 'wb+') as f:
-                    pickle.dump(lut, f)
+            # if not fpath_lut.exists():
+            with open(fpath_lut, 'wb+') as f:
+                pickle.dump(lut, f)
 
         logger.info(f'{metadata.product_uri.iloc[0]} finished PROSAIL runs')
 
@@ -263,7 +274,7 @@ if __name__ == '__main__':
     lut_params_dir = Path('lut_params')
 
     # target trait(s)
-    traits = ['lai', 'ccc']
+    traits = ['lai', 'cab', 'ccc']
 
     # metadata filters for retrieving S2 scenes
     metadata_filters = [

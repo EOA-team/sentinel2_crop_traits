@@ -103,7 +103,7 @@ def invert_scenes(
     
                 # save traits to file
                 trait_collection = RasterCollection()
-                for tdx, trait in enumerate(['lai', 'ccc']):
+                for tdx, trait in enumerate(['lai', 'cab', 'ccc']):
                     trait_collection.add_band(
                         Band,
                         geo_info=s2_ds[bands[0]].geo_info,
@@ -147,6 +147,7 @@ def invert_scenes(
                     band_name='median_error',
                     values=median_cost_function_vals
                 )
+
                 # save to GeoTiff
                 fname = scene_dir.joinpath(f'{pheno_phase}_lutinv_traits.tiff')
                 trait_collection.to_rasterio(fpath_raster=fname)
@@ -156,7 +157,7 @@ def invert_scenes(
 if __name__ == '__main__':
 
     farms = ['Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg', 'SwissFutureFarm_2019']
-    data_dir = Path('../results/lut_based_inversion')
+    data_dir = Path('./results/lut_based_inversion')
 
     cost_functions = {
         'all_phases': 'mae',

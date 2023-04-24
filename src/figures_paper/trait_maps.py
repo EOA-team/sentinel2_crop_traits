@@ -37,7 +37,7 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
         directory where to save figure to (WTZ_Trait_Maps.png)
     """
     # loop over dates and plot data
-    f, ax = plt.subplots(figsize=(38,18), ncols=5, nrows=2, sharex=True, sharey=True)
+    f, ax = plt.subplots(figsize=(38,28), ncols=5, nrows=3, sharex=True, sharey=True)
 
     r2_results_list = []
 
@@ -53,6 +53,7 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
             trait_ds['ccc'].mask(mask=mask, inplace=True)
         
         # plot traits
+        # GLAI
         if idx < 4:
             colorbar_label = None
         else:
@@ -70,6 +71,7 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
         scalebar = ScaleBar(dx=1, units="m")
         ax[0,idx].add_artist(scalebar)
 
+        # CCC
         if idx < 4:
             colorbar_label = None
         else:
@@ -85,6 +87,23 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
         ax[1,idx].set_title('')
         scalebar = ScaleBar(dx=1, units="m")
         ax[1,idx].add_artist(scalebar)
+
+        # CAB
+        if idx < 4:
+            colorbar_label = None
+        else:
+            colorbar_label = r'Cab [$\mu g$ $cm^{-2}$]'
+        trait_ds['cab'].plot(
+            vmin=0,
+            vmax=70,
+            colormap='viridis',
+            colorbar_label=colorbar_label,
+            ax=ax[2,idx],
+            fontsize=18
+        )
+        ax[2,idx].set_title('')
+        scalebar = ScaleBar(dx=1, units="m")
+        ax[2,idx].add_artist(scalebar)
 
         # # GLAI - CCC R2
         glai_vals = trait_ds['lai'].values.flatten()
@@ -118,8 +137,8 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
 
 if __name__ == '__main__':
 
-    data_dir = Path('../../results/lut_based_inversion/Witzwil')
-    out_dir = Path('../../results/Figures')
+    data_dir = Path('./results/lut_based_inversion/Witzwil')
+    out_dir = Path('./results/Figures')
     out_dir.mkdir(exist_ok=True)
 
     plot_trait_maps(data_dir, out_dir)
