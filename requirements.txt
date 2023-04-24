@@ -9,3 +9,4 @@ scipy
 seaborn
 sklearn
 spart-python
+eodal
