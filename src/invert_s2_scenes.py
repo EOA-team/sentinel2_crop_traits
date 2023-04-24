@@ -13,7 +13,7 @@ from eodal.config import get_settings
 from eodal.core.band import Band
 from eodal.core.raster import RasterCollection
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from rtm_inv.core.config import RTMConfig, LookupTableBasedInversion
 from rtm_inv.core.inversion import inv_img, retrieve_traits
@@ -30,7 +30,8 @@ def invert_scenes(
     n_solutions: Dict[str, int],
     cost_functions: Dict[str, str],
     aggregation_methods: Dict[str, str],
-    lut_sizes: Dict[str, str]
+    lut_sizes: Dict[str, str],
+    traits: Optional[List[str]] = ['lai', 'cab', 'ccc']
 ):
     """
     Lookup table based inversion of S2 imagery. The inversion setup can
@@ -49,6 +50,9 @@ def invert_scenes(
     :param lut_sizes:
         LUT sizes (i.e., number of PROSAIL spectra) to use per phenological
         macro-stage to run the inversion
+    :param traits:
+        list of traits to extract (this is used to find the correct LUT file).
+        Defaults to 'lai', 'cab', and 'ccc'.
     """
     # loop over locations
     for farm in farms:
@@ -67,6 +71,10 @@ def invert_scenes(
             logger.info(f'{farm}: Started inversion of {scene_dir.name}')
             # find the LUTs generated and use them for inversion
             for fpath_lut in scene_dir.glob('*lut.pkl'):
+                # check if the LUT contains the correct traits, otherwise continue
+                fname_lut = fpath_lut.name
+                if not all([x in fname_lut for x in traits]):
+                    continue
                 lut = pd.read_pickle(fpath_lut)
                 pheno_phase = fpath_lut.name.split('_')[0]
                 if pheno_phase == 'all': pheno_phase = 'all_phases'
@@ -96,14 +104,14 @@ def invert_scenes(
                 trait_img, q05_img, q95_img = retrieve_traits(
                     lut=lut,
                     lut_idxs=lut_idxs,
-                    traits=['lai', 'ccc'],
+                    traits=traits,
                     cost_function_values=cost_function_values,
                     measure=aggregation_methods[pheno_phase]
                 )
     
                 # save traits to file
                 trait_collection = RasterCollection()
-                for tdx, trait in enumerate(['lai', 'cab', 'ccc']):
+                for tdx, trait in enumerate(traits):
                     trait_collection.add_band(
                         Band,
                         geo_info=s2_ds[bands[0]].geo_info,
