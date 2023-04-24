@@ -93,7 +93,9 @@ class LookupTable(object):
             self,
             num_samples: int,
             method: str,
-            seed_value: Optional[int] = 0
+            seed_value: Optional[int] = 0,
+            apply_glai_ccc_constraint: Optional[bool] = True,
+            apply_chlorophyll_carotiniod_constraint: Optional[bool] = True
         ):
         """
         Sample parameter values using a custom sampling scheme.
@@ -115,6 +117,10 @@ class LookupTable(object):
         :param seed_value:
             seed value to set to the pseudo-random-number generator. Default
             is zero.
+        :param apply_glai_ccc_constraint:
+            whether the apply the GLAI-CCC constraint. Default is True.
+        :param apply_glai_ccc_constraint:
+            whether the apply the Cab-Car constraint. Default is True.
         """
         # set seed to the random number generator
         np.random.seed(seed_value)
@@ -186,8 +192,10 @@ class LookupTable(object):
         # implement constraints to make the LUT physiologically more plausible, i.e.,
         # increase the correlation between plant biochemical and biophysical parameters
         # which is observed in plants but not reflected by a random sampling scheme
-        sample_traits = glai_ccc_constraint(lut_df=sample_traits)
-        sample_traits = chlorophyll_carotiniod_constraint(lut_df=sample_traits)
+        if apply_glai_ccc_constraint:
+            sample_traits = glai_ccc_constraint(lut_df=sample_traits)
+        if apply_chlorophyll_carotiniod_constraint:
+            sample_traits = chlorophyll_carotiniod_constraint(lut_df=sample_traits)
         # set samples to instance variable
         self.samples = sample_traits
 

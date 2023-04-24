@@ -20,7 +20,7 @@ from eodal.mapper.mapper import Mapper, MapperConfigs
 from eodal.utils.sentinel2 import get_S2_platform_from_safe
 from pathlib import Path
 from rtm_inv.core.lookup_table import generate_lut
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from utils import get_farms
 
@@ -137,7 +137,8 @@ def get_s2_spectra(
     lut_params_dir: Path,
     s2_mapper_config: Dict[str, Any],
     rtm_lut_config: Dict[str, Any],
-    traits: List[str]
+    traits: List[str],
+    apply_contraints: Optional[bool] = True
 ) -> None:
     """
     Extract S2 SRF for field parcel geometries and run PROSAIL in forward mode
@@ -155,6 +156,8 @@ def get_s2_spectra(
     :param traits:
         name of the PROSAIL traits to save to the LUTs (determines which traits
         are available from the inversion)
+    :param apply_constraints:
+        whether to apply the GLAI-CCC and Cab-Car constraint. Default is True.
     """
     trait_str = '-'.join(traits)
 
@@ -216,21 +219,29 @@ def get_s2_spectra(
                     continue
     
             # generate lookup-table for the current angles
-            fpath_lut = res_dir_scene.joinpath(f'{pheno_phases}_{trait_str}_lut.pkl')
+            if apply_contraints:
+                fpath_lut = res_dir_scene.joinpath(f'{pheno_phases}_{trait_str}_lut.pkl')
+            else:
+                fpath_lut = res_dir_scene.joinpath(f'{pheno_phases}_{trait_str}_lut_no-constraints.pkl')
             # if LUT exists, continue, else generate it
-            # if not fpath_lut.exists():
-            #     lut_inp = rtm_lut_config.copy()
-            #     lut_inp.update(angle_dict)
-            #     lut_inp['lut_params'] = lut_params_pheno
-            #     lut = generate_lut(**lut_inp)
-            #     # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
-            #     if 'ccc' in traits:
-            #         lut['ccc'] = lut['lai'] * lut['cab']
-            #         # convert to g m-2 as this is the more common unit
-            #         # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
-            #         lut['ccc'] *= 1e-2
-            # else:
-            #     continue
+            if not fpath_lut.exists():
+                lut_inp = rtm_lut_config.copy()
+                lut_inp.update(angle_dict)
+                if not apply_contraints:
+                    lut_inp.update({
+                        'apply_glai_ccc_constraint': False,
+                        'apply_chlorophyll_carotinoid_contraint': False 
+                    })
+                lut_inp['lut_params'] = lut_params_pheno
+                lut = generate_lut(**lut_inp)
+                # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
+                if 'ccc' in traits:
+                    lut['ccc'] = lut['lai'] * lut['cab']
+                    # convert to g m-2 as this is the more common unit
+                    # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
+                    lut['ccc'] *= 1e-2
+            else:
+                continue
 
             lut_inp = rtm_lut_config.copy()
             lut_inp.update(angle_dict)
@@ -307,17 +318,21 @@ if __name__ == '__main__':
 
         output_dir_farm = out_dir.joinpath(f'{farm}_{year}')
         output_dir_farm.mkdir(exist_ok=True)
-        try:
-            get_s2_spectra(
-                output_dir=output_dir_farm,
-                lut_params_dir=lut_params_dir,
-                s2_mapper_config=s2_mapper_config,
-                rtm_lut_config=rtm_lut_config,
-                traits=traits
-            )
-        except Exception as e:
-            logger.error(f'Farm {farm}: {e}')
-            continue
+        apply_constraints_list = [False, True]
+        for apply_constraints in apply_constraints_list:
+            logger.info(f'Apply physiological constraint: {apply_constraints}')
+            try:
+                get_s2_spectra(
+                    output_dir=output_dir_farm,
+                    lut_params_dir=lut_params_dir,
+                    s2_mapper_config=s2_mapper_config,
+                    rtm_lut_config=rtm_lut_config,
+                    traits=traits,
+                    apply_contraints=apply_constraints
+                )
+            except Exception as e:
+                logger.error(f'Farm {farm}: {e}')
+                continue
 
         logger.info(f'Finished working on {farm}')
 
