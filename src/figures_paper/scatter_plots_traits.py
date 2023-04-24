@@ -18,12 +18,12 @@ trait_settings = {
     'lai': {
         'trait_name': 'Green Leaf Area Index',
         'trait_unit': r'$m^2$ $m^{-2}$',
-        'trait_lims': TraitLimits(0,8),
+        'trait_lims': TraitLimits(0, 8),
     },
     'ccc': {
         'trait_name': 'Canopy Chlorophyll Content',
         'trait_unit': r'$g$ $m^{-2}$',
-        'trait_lims': TraitLimits(0,4),
+        'trait_lims': TraitLimits(0, 4),
     }
 }
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         df_agdds_s2 = pd.read_csv(fpath_agdds_s2)
         df_agdds_s2.dropna(subset=[trait], inplace=True)
 
-        f, ax = plt.subplots(ncols=3, figsize=(30,10), sharey=True)
+        f, ax = plt.subplots(ncols=3, figsize=(30, 10), sharey=True)
 
         # NO-PHENO experiment
         _, errors_no_pheno = plot_prediction(

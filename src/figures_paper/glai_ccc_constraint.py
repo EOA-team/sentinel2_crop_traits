@@ -1,8 +1,9 @@
 '''
-Develop a Green Leaf Area Index (GLAI) - Canopy Chlorophyll Content (CCC) constraint
-for redistributing Chlorophyll a+b values in Lookup Tables (LUT) following a similar
-approach as Wocher et al. (2020) did for establishing a relationship between leaf
-chlorophyll and leaf carotinoid content based on empirical evidence.
+Develop a Green Leaf Area Index (GLAI) - Canopy Chlorophyll Content (CCC)
+constraint for redistributing Chlorophyll a+b values in Lookup Tables (LUT)
+following a similar approach as Wocher et al. (2020) did for establishing
+a relationship between leaf chlorophyll and leaf carotinoid content based
+on empirical evidence.
 
 @author: Lukas Valentin Graf
 '''
@@ -20,11 +21,14 @@ from scipy.stats import linregress
 mpl.rc('font', size=16)
 plt.style.use('bmh')
 
+
 def linear_regression(x, a, b):
     return a * x + b
 
+
 def polynomial(x, a, b, c):
     return a * x**2 + b * x + c
+
 
 def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
     """
@@ -52,7 +56,7 @@ def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
         linear_regression,
         xdata=df_veg['greenLAI'],
         ydata=df_veg['ccc'],
-        bounds=[(-np.inf,0), (np.inf,np.inf)]
+        bounds=[(-np.inf, 0), (np.inf, np.inf)]
     )
     regr_line_veg = linear_regression(glai_linspace, *popt_veg)
 
@@ -70,14 +74,19 @@ def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
         linear_regression,
         xdata=df['greenLAI'],
         ydata=df['ccc'],
-        bounds=[(-np.inf,0), (np.inf,np.inf)]
+        bounds=[(-np.inf, 0), (np.inf, np.inf)]
     )
     regr_line_all = linear_regression(glai_linspace, *popt)
     a_all, b_all = popt
-    regr_expr_dict = {'constraint': 'linear_regression', 'expression': f'{b_all} + {a_all} * glai'}
+    regr_expr_dict = {
+        'constraint': 'linear_regression',
+        'expression': f'{b_all} + {a_all} * glai'}
     r_value = linregress(df['greenLAI'], df['ccc']).rvalue
-    stats_df = pd.DataFrame([{'N': df.shape[0], 'r_value': r_value, 'R2': r_value**2}])
-    stats_df.to_csv(out_dir.joinpath('empirical_relationship_gcc-glai_r2.csv'), index=False)
+    stats_df = pd.DataFrame(
+        [{'N': df.shape[0], 'r_value': r_value, 'R2': r_value**2}])
+    stats_df.to_csv(
+        out_dir.joinpath('empirical_relationship_gcc-glai_r2.csv'),
+        index=False)
 
     # upper bound determined from vegetative model using standard deviation
     # of linearly derived CCC values as suggested by Wocher et al. (2020)
@@ -93,38 +102,51 @@ def empirircal_relationship(df: pd.DataFrame, out_dir: Path) -> None:
     sd_ccc_rep = np.std(regr_line_rep)
     x_rep = glai_linspace / sd_ccc_rep
     lb = 2*a * x_rep**2 + b * x_rep - c
-    lb_expr = f'2*{a} * (glai / {sd_ccc_rep})**2 + {b} *  glai / {sd_ccc_rep} - {c}'
+    lb_expr = \
+        f'2*{a} * (glai / {sd_ccc_rep})**2 + {b} *  glai / {sd_ccc_rep} - {c}'
     lb_expr_dict = {'constraint': 'lower', 'expression': lb_expr}
 
     # plot data
-    f, ax = plt.subplots(figsize=(10,10))
-    sns.scatterplot(x='greenLAI', y='ccc', hue='growth_class', style='growth_class', data=df, ax=ax,
-                    palette=['darkblue', 'orange'], hue_order=['before flowering', 'after flowering'])
-    ax.set_ylabel('In-situ Canopy Chlorophyll Content [$g$ $m^{-2}$]', fontsize=16)
-    ax.set_xlabel('In-situ Green Leaf Area Index [$m^2$ $m^{-2}$]', fontsize=16)
-    sns.lineplot(x=glai_linspace, y=regr_line_all, ax=ax,
-                 label=f'Empirical Regression',
-                 color='grey', linestyle='dashed', linewidth=2
+    f, ax = plt.subplots(figsize=(10, 10))
+    sns.scatterplot(
+        x='greenLAI',
+        y='ccc',
+        hue='growth_class',
+        style='growth_class',
+        data=df,
+        ax=ax,
+        palette=['darkblue', 'orange'],
+        hue_order=['before flowering', 'after flowering'])
+    ax.set_ylabel(
+        'In-situ Canopy Chlorophyll Content [$g$ $m^{-2}$]', fontsize=16)
+    ax.set_xlabel(
+        'In-situ Green Leaf Area Index [$m^2$ $m^{-2}$]', fontsize=16)
+    sns.lineplot(
+        x=glai_linspace, y=regr_line_all, ax=ax,
+        label='Empirical Regression',
+        color='grey', linestyle='dashed', linewidth=2
     )
-    sns.lineplot(x=glai_linspace, y=ub, ax=ax, label=f'Upper Envelope',
+    sns.lineplot(x=glai_linspace, y=ub, ax=ax, label='Upper Envelope',
                  color='grey', linestyle='dotted', linewidth=2)
-    sns.lineplot(x=glai_linspace, y=lb, ax=ax, label=f'Lower Envelope',
+    sns.lineplot(x=glai_linspace, y=lb, ax=ax, label='Lower Envelope',
                  color='grey', linestyle='dashdot', linewidth=2)
     # ax.set_title(f'Empirical; N={df.shape[0]}', size=16)
-    ax.set_ylim(0,6)
-    ax.set_xlim(0,df.greenLAI.max())
+    ax.set_ylim(0, 6)
+    ax.set_xlim(0, df.greenLAI.max())
     ax.tick_params(axis='both', labelsize=16)
 
     fname = out_dir.joinpath('empirical_relationship_gcc-glai.png')
     f.savefig(fname, bbox_inches='tight')
     plt.close(f)
 
-    # save expression of lower and upper constraints and the linear regression to csv
+    # save expression of lower and upper constraints and the linear
+    # regression to csv
     reg_df = pd.DataFrame(
         data=[lb_expr_dict, ub_expr_dict, regr_expr_dict]
     )
     fname = out_dir.joinpath('empirical_relationship_gcc-glai.csv')
     reg_df.to_csv(fname, index=False)
+
 
 if __name__ == '__main__':
 
