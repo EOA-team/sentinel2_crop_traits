@@ -230,7 +230,7 @@ def get_s2_spectra(
                 if not apply_contraints:
                     lut_inp.update({
                         'apply_glai_ccc_constraint': False,
-                        'apply_chlorophyll_carotinoid_contraint': False 
+                        'apply_chlorophyll_carotiniod_constraint': False 
                     })
                 lut_inp['lut_params'] = lut_params_pheno
                 lut = generate_lut(**lut_inp)
@@ -318,7 +318,7 @@ if __name__ == '__main__':
 
         output_dir_farm = out_dir.joinpath(f'{farm}_{year}')
         output_dir_farm.mkdir(exist_ok=True)
-        apply_constraints_list = [False, True]
+        apply_constraints_list = [False] # [False, True]
         for apply_constraints in apply_constraints_list:
             logger.info(f'Apply physiological constraint: {apply_constraints}')
             try:
