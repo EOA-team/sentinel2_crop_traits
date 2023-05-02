@@ -248,7 +248,8 @@ def plot_prediction(
         trait_unit: str,
         trait_lims: TraitLimits,
         ax: Optional[Axes] = None,
-        pred_unc: Optional[np.ndarray | List[np.ndarray]] = None
+        pred_unc: Optional[np.ndarray | List[np.ndarray]] = None,
+        hue: Optional[np.ndarray] = None
 ) -> Tuple[plt.Figure, Dict[str, Number]]:
     """
     Plots predicted against true trait values.
@@ -267,6 +268,8 @@ def plot_prediction(
         uncertainties of the prediction (if available). If a single
         numpy array symmetric error bars are drawn. If a list with two
         numpy arrays draws asymmetric error bars.
+    :param hue:
+        hue vector to color data points (optional).
     :returns:
         resulting `~plt.Figure` and dictionary with error metrics of
         the prediction against true values
@@ -307,7 +310,7 @@ def plot_prediction(
     else:
         f = ax.get_figure()
     if pred_unc is None:
-        sns.scatterplot(x=true, y=pred, ax=ax)
+        sns.scatterplot(x=true, y=pred, ax=ax, style=hue, s=100)
     else:
         ax.errorbar(
             true, pred, yerr=pred_unc, fmt='o', ecolor='grey', elinewidth=.3)
