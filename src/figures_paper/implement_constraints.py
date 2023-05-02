@@ -10,7 +10,7 @@ import pandas as pd
 from pathlib import Path
 
 plt.style.use('bmh')
-mpl.rcParams['font.size'] = 16
+mpl.rcParams['font.size'] = 20
 
 
 def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
@@ -38,7 +38,7 @@ def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
         plt.subplots(ncols=2, nrows=3, figsize=(30, 20))
     ax1, ax2, ax3, ax4, ax5, ax6 = axes.flatten()
     lut_no_constraints.plot.scatter(
-        x='lai', y='ccc', c='k', alpha=0.1, ax=ax1)
+        x='lai', y='ccc', c='k', alpha=0.1, ax=ax1, cmap='viridis')
     lut_with_constraints.plot.scatter(
         x='lai', y='ccc', c='k', alpha=0.1, ax=ax2)
     ax1.set_title('Without physiological constraints')
@@ -47,6 +47,12 @@ def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
     ax2.set_xlabel(r'Green Leaf Area Index [$m^2$ $m^{-2}$]')
     ax1.set_ylabel(r'Canopy Chlorophyll Content [$g$ $m^{-2}$]')
     ax2.set_ylabel(r'Canopy Chlorophyll Content [$g$ $m^{-2}$]')
+    # set the limit of the LAI to 0-8
+    ax1.set_xlim(0, 8)
+    ax2.set_xlim(0, 8)
+    # set the limit of the CCC to 0-7
+    ax1.set_ylim(0, 7)
+    ax2.set_ylim(0, 7)
 
     # the same with GLAI and Cab
     lut_no_constraints.plot.scatter(
@@ -57,6 +63,10 @@ def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
     ax4.set_xlabel(r'Green Leaf Area Index [$m^2$ $m^{-2}$]')
     ax3.set_ylabel(r'Leaf Chlorophyll Content [$\mu g$ $cm^{-2}$]')
     ax4.set_ylabel(r'Leaf Chlorophyll Content [$\mu g$ $cm^{-2}$]')
+    ax3.set_xlim(0, 8)
+    ax3.set_ylim(0, 100)
+    ax4.set_xlim(0, 8)
+    ax4.set_ylim(0, 100)
 
     # the same Cab and Car
     lut_no_constraints.plot.scatter(
@@ -67,6 +77,10 @@ def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
     ax6.set_xlabel(r'Leaf Chlorophyll Content [$\mu g$ $cm^{-2}$]')
     ax5.set_ylabel(r'Leaf Carotenoid Content [$\mu g$ $cm^{-2}$]')
     ax6.set_ylabel(r'Leaf Carotenoid Content [$\mu g$ $cm^{-2}$]')
+    ax5.set_xlim(0, 100)
+    ax5.set_ylim(0, 30)
+    ax6.set_xlim(0, 100)
+    ax6.set_ylim(0, 30)
 
     # add a textbox to each axis numbering them a, b, c and so on
     for i, ax in enumerate(axes.flatten()):
