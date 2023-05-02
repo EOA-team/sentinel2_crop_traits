@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from utils import plot_prediction, TraitLimits
 
+
 plt.style.use('bmh')
 mpl.rc('font', size=20)
+
 
 trait_settings = {
     'lai': {
@@ -26,6 +28,7 @@ trait_settings = {
         'trait_lims': TraitLimits(0, 4),
     }
 }
+
 
 if __name__ == '__main__':
 
@@ -55,6 +58,12 @@ if __name__ == '__main__':
         df_agdds_s2 = pd.read_csv(fpath_agdds_s2)
         df_agdds_s2.dropna(subset=[trait], inplace=True)
 
+        # extract the year
+        df_agdds['year'] = pd.to_datetime(
+            df_agdds['date_model']).dt.year
+        df_agdds_s2['year'] = pd.to_datetime(
+            df_agdds_s2['date_model']).dt.year
+
         f, ax = plt.subplots(ncols=3, figsize=(30, 10), sharey=True)
 
         # NO-PHENO experiment
@@ -62,6 +71,7 @@ if __name__ == '__main__':
             true=df_agdds[trait],
             pred=df_agdds[f'{trait}_all'],
             ax=ax[0],
+            hue=df_agdds['year'],
             **trait_settings[trait]
         )
         ax[0].set_title('(a)   NO-PHENO')
@@ -72,6 +82,7 @@ if __name__ == '__main__':
             true=df_agdds[trait],
             pred=df_agdds[f'{trait} (Phenology)'],
             ax=ax[1],
+            hue=df_agdds['year'],
             **trait_settings[trait]
         )
         ax[1].set_title('(b)   AGDD-PHENO')
@@ -82,6 +93,7 @@ if __name__ == '__main__':
             true=df_agdds_s2[trait],
             pred=df_agdds_s2[f'{trait} (Phenology)'],
             ax=ax[2],
+            hue=df_agdds_s2['year'],
             **trait_settings[trait]
         )
         ax[2].set_title('(c)   AGDD-S2-PHENO')
