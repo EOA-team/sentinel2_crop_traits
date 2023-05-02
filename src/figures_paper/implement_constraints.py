@@ -33,12 +33,12 @@ def show_constraints_in_lut(sample_scene: Path, out_dir: Path) -> None:
     # Plot the LUTs
     # plot the correlation of GLAI and CCC without constraints to the left
     # and the correlation of GLAI and CCC with constraints to the right
-    # color the plots by density
+    # color the plots by density using viridis
     fig, axes = \
         plt.subplots(ncols=2, nrows=3, figsize=(30, 20))
     ax1, ax2, ax3, ax4, ax5, ax6 = axes.flatten()
     lut_no_constraints.plot.scatter(
-        x='lai', y='ccc', c='k', alpha=0.1, ax=ax1, cmap='viridis')
+        x='lai', y='ccc', c='k', alpha=0.1, ax=ax1)
     lut_with_constraints.plot.scatter(
         x='lai', y='ccc', c='k', alpha=0.1, ax=ax2)
     ax1.set_title('Without physiological constraints')
