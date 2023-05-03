@@ -1,6 +1,7 @@
 '''
 This script recreates the Figure showing the temporal evolution of median
-GLAI per field parcel and S2 scenes in calendar dates and thermal time.
+GLAI, CCC and Cab per field parcel and S2 scenes in calendar dates and
+thermal time.
 
 @author: Lukas Valentin Graf
 '''
@@ -79,9 +80,12 @@ def get_parcel_ts(
         res_dict = {}
         for _, trait in enumerate(traits):
             res_dict.update({
-                f'{trait}_q05': np.nanquantile(trait_ds[trait].values.data, 0.05),
-                f'{trait}_q50': np.nanquantile(trait_ds[trait].values.data, 0.5),
-                f'{trait}_q95': np.nanquantile(trait_ds[trait].values.data, 0.95)})
+                f'{trait}_q05': np.nanquantile(trait_ds[trait].values.data,
+                                               0.05),
+                f'{trait}_q50': np.nanquantile(trait_ds[trait].values.data,
+                                               0.5),
+                f'{trait}_q95': np.nanquantile(trait_ds[trait].values.data,
+                                               0.95)})
 
         res_dict.update({
             'sensing_date': pd.to_datetime(scene_id.split('_')[2][0:8]).date(),
@@ -183,8 +187,8 @@ if __name__ == '__main__':
 
         if legend:
             ax[jj+1].legend(loc='upper center',
-                            bbox_to_anchor=(0., -0.3), fancybox=False, shadow=False,
-                            ncol=4)
+                            bbox_to_anchor=(0., -0.3), fancybox=False,
+                            shadow=False, ncol=4)
 
         ax[jj].set_ylabel(f'{traits_to_plot_names[idx]}' + units[idx])
         ax[jj+1].set_ylabel('')
