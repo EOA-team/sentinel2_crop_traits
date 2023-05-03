@@ -50,7 +50,7 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
         figsize=(38, 28), ncols=5, nrows=3, sharex=True,
         sharey=True)
 
-    r2_results_list = []
+    r2_results_glai_ccc_list = []
 
     for idx, item in enumerate(selected_dates.items()):
         k, v = item
@@ -62,6 +62,7 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
             mask = trait_ds['lai'].values == 3.9924788
             trait_ds['lai'].mask(mask=mask, inplace=True)
             trait_ds['ccc'].mask(mask=mask, inplace=True)
+            trait_ds['cab'].mask(mask=mask, inplace=True)
 
         # plot traits
         # GLAI
@@ -75,14 +76,24 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
             colormap='viridis',
             colorbar_label=colorbar_label,
             ax=ax[0, idx],
-            fontsize=18
+            fontsize=20
         )
         ax[0, idx].set_xlabel('')
+        ax[0, idx].set_ylabel('')
         ax[0, idx].set_title(f'{v["Phase"]}\n{k} ({v["AGDD"]} deg C)')
         scalebar = ScaleBar(dx=1, units="m")
         ax[0, idx].add_artist(scalebar)
 
+        # when idx is 0 set a text box with "GLAI" left to the first subplot
+        # in the row rotated by 90 degrees
+        if idx == 0:
+            ax[0, idx].text(
+                -0.1, 0.5, 'GLAI', fontsize=30, transform=ax[0, idx].transAxes,
+                rotation=90, va='center', ha='center')
+
         # CCC
+        if idx == 0:
+            ax[1, idx].set_ylabel('CCC [$g$ $m^{-2}$]')
         if idx < 4:
             colorbar_label = None
         else:
@@ -93,11 +104,20 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
             colormap='viridis',
             colorbar_label=colorbar_label,
             ax=ax[1, idx],
-            fontsize=18
+            fontsize=20
         )
+        ax[1, idx].set_xlabel('')
+        ax[1, idx].set_ylabel('')
         ax[1, idx].set_title('')
         scalebar = ScaleBar(dx=1, units="m")
         ax[1, idx].add_artist(scalebar)
+
+        # similar to GLAI, set a text box with "CCC" left to the first subplot
+        # in the row rotated by 90 degrees
+        if idx == 0:
+            ax[1, idx].text(
+                -0.1, 0.5, 'CCC', fontsize=30, transform=ax[1, idx].transAxes,
+                rotation=90, va='center', ha='center')
 
         # CAB
         if idx < 4:
@@ -110,27 +130,47 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
             colormap='viridis',
             colorbar_label=colorbar_label,
             ax=ax[2, idx],
-            fontsize=18
+            fontsize=20
         )
+        ax[2, idx].set_xlabel('')
+        ax[2, idx].set_ylabel('')
         ax[2, idx].set_title('')
         scalebar = ScaleBar(dx=1, units="m")
         ax[2, idx].add_artist(scalebar)
+
+        # similar to GLAI, set a text box with "Cab" left to the first subplot
+        # in the row rotated by 90 degrees
+        if idx == 0:
+            ax[2, idx].text(
+                -0.1, 0.5, 'Cab', fontsize=30, transform=ax[2, idx].transAxes,
+                rotation=90, va='center', ha='center')
 
         # # GLAI - CCC R2
         glai_vals = trait_ds['lai'].values.flatten()
         if isinstance(glai_vals, np.ma.MaskedArray):
             glai_vals = glai_vals.data
+        glai_vals = glai_vals[~np.isnan(glai_vals)]
         ccc_vals = trait_ds['ccc'].values.flatten()
         if isinstance(ccc_vals, np.ma.MaskedArray):
             ccc_vals = ccc_vals.data
+        ccc_vals = ccc_vals[~np.isnan(ccc_vals)]
+        cab_vals = trait_ds['cab'].values.flatten()
+        if isinstance(cab_vals, np.ma.MaskedArray):
+            cab_vals = cab_vals.data
+        cab_vals = cab_vals[~np.isnan(cab_vals)]
 
-        linregress_res = linregress(
-            glai_vals[~np.isnan(glai_vals)],
-            ccc_vals[~np.isnan(ccc_vals)]
-        )
-        r = linregress_res.rvalue
-        r2 = r**2
-        r2_results_list.append({'date': k, 'R2': r2, 'N': glai_vals.size})
+        # save the R2 between GLAI and CCC for each date
+        # as well as the number of valid pixels
+        # get the linear regression model between GLAI and CCC
+        # and save the rscore
+        linregress_glai_ccc = linregress(glai_vals, ccc_vals)
+        linregress_glai_cab = linregress(glai_vals, cab_vals)
+
+        r2_results_glai_ccc_list.append({
+            'date': k,
+            'r2': linregress_glai_ccc.rvalue**2,
+            'n_pixels': len(glai_vals),
+            'r2_cab': linregress_glai_cab.rvalue**2})
 
         for ii in range(2):
             ax[ii, idx].set_xlabel('')
@@ -142,15 +182,19 @@ def plot_trait_maps(data_dir: Path, out_dir: Path) -> None:
     f.savefig(fname_maps, bbox_inches='tight')
     plt.close(f)
 
-    r2_results = pd.DataFrame(r2_results_list)
-    r2_results.to_csv(
+    r2_results_glai_ccc = pd.DataFrame(r2_results_glai_ccc_list)
+    r2_results_glai_ccc.to_csv(
         out_dir.joinpath('WTZ_Trait_Maps_GLAI-CCC_R2.csv'), index=False)
 
 
 if __name__ == '__main__':
 
-    data_dir = Path('./results/lut_based_inversion/Witzwil')
-    out_dir = Path('./results/Figures')
+    import os
+    cwd = Path(__file__).parent.absolute()
+    os.chdir(cwd)
+
+    data_dir = Path('../../results/lut_based_inversion/Witzwil')
+    out_dir = Path('../../results/Figures')
     out_dir.mkdir(exist_ok=True)
 
     plot_trait_maps(data_dir, out_dir)
