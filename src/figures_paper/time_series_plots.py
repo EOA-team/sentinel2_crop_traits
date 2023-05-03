@@ -150,13 +150,16 @@ if __name__ == '__main__':
     # calculate the leaf chlorophyll content
     df['cab_q50'] = df['ccc_q50'] / df['lai_q50'] * 100
 
-    # plot time series of the single parcels into one figure
-    f, ax = plt.subplots(figsize=(30, 10), ncols=2, nrows=3)
-    ax = ax.flatten()
+    # save dataframe
+    df.to_csv(out_dir.joinpath('ts_dates_agdds.csv'))
 
+    # plot time series of the single parcels into one figure
+    f, ax = plt.subplots(figsize=(40, 20), ncols=2, nrows=3)
+    ax = ax.flatten()
     traits_to_plot = ['lai', 'ccc', 'cab']
     traits_to_plot_names = ['GLAI', 'CCC', 'Cab']
     units = [r'[$m^2$ $m^{-2}$]', r'[$g$ $m^{-2}$]', r'[$\mu g$ $cm^{-2}$]']
+    jj = 0
     for idx in range(3):
         legend = False
         if idx == 2:
@@ -166,7 +169,7 @@ if __name__ == '__main__':
             y=f'{traits_to_plot[idx]}_q50',
             hue='parcel',
             data=df,
-            ax=ax[idx],
+            ax=ax[jj],
             legend=False,
             marker='x')
         sns.lineplot(
@@ -174,22 +177,26 @@ if __name__ == '__main__':
             y=f'{traits_to_plot[idx]}_q50',
             hue='parcel',
             data=df,
-            ax=ax[idx+1],
+            ax=ax[jj+1],
             marker='x',
             legend=legend)
 
-        ax[idx].set_ylabel(f'Median {traits_to_plot_names[idx]}' + units[idx])
-        ax[idx+1].set_ylabel('')
+        if legend:
+            ax[jj+1].legend(loc='upper center',
+                            bbox_to_anchor=(0., -0.3), fancybox=False, shadow=False,
+                            ncol=4)
+
+        ax[jj].set_ylabel(f'{traits_to_plot_names[idx]}' + units[idx])
+        ax[jj+1].set_ylabel('')
+        ax[jj].set_xlabel('')
+        ax[jj+1].set_xlabel('')
         if idx == 0:
-            ax[idx].set_title('(a) Calendar Dates')
-            ax[idx+1].set_title('(b) Thermal Time')
+            ax[jj].set_title('(a) Calendar Dates')
+            ax[jj+1].set_title('(b) Thermal Time')
         if idx == 2:
-            ax[idx].set_xlabel('Date (YYYY-MM)')
-            ax[idx+1].set_xlabel(r'Accumulated Growing Degree Days [$deg$ $C$]')
-            plt.setp(ax[idx].xaxis.get_majorticklabels(), rotation=45)
-            plt.setp(ax[idx+1].xaxis.get_majorticklabels(), rotation=45)
+            ax[jj].set_xlabel('Date (YYYY-MM)')
+            ax[jj+1].set_xlabel(r'Accumulated Growing Degree Days [$deg$ $C$]')
+        jj += 2
 
-    f.savefig(out_dir.joinpath('ts_dates_agdds.png'))
-
-    # save dataframe
-    df.to_csv(out_dir.joinpath('ts_dates_agdds.csv'))
+    f.savefig(out_dir.joinpath('ts_dates_agdds.png'), bbox_inches='tight')
+    plt.close(f)
