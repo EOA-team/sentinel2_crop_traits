@@ -30,7 +30,7 @@ def invert_scenes(
     cost_functions: Dict[str, str],
     aggregation_methods: Dict[str, str],
     lut_sizes: Dict[str, str],
-    traits: Optional[List[str]] = ['lai', 'cab', 'ccc']
+    traits: Optional[List[str]] = ['lai', 'ccc']
 ):
     """
     Lookup table based inversion of S2 imagery. The inversion setup can
@@ -180,6 +180,7 @@ if __name__ == '__main__':
     farms = [
         'Strickhof', 'SwissFutureFarm', 'Witzwil', 'Arenenberg',
         'SwissFutureFarm_2019']
+    farms = ['SwissFutureFarm_2019']
     data_dir = Path('./results/lut_based_inversion')
 
     cost_functions = {
