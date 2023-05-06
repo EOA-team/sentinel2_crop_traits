@@ -310,7 +310,7 @@ if __name__ == '__main__':
     #######################################################################
 
     # extraction for 2019
-    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2019')
     year = 2019
     farms = ['SwissFutureFarm']
 
@@ -332,21 +332,18 @@ if __name__ == '__main__':
 
         output_dir_farm = out_dir.joinpath(f'{farm}_{year}')
         output_dir_farm.mkdir(exist_ok=True)
-        apply_constraints_list = [False, True]
-        for apply_constraints in apply_constraints_list:
-            logger.info(f'Apply physiological constraint: {apply_constraints}')
-            try:
-                get_s2_spectra(
-                    output_dir=output_dir_farm,
-                    lut_params_dir=lut_params_dir,
-                    s2_mapper_config=s2_mapper_config,
-                    rtm_lut_config=rtm_lut_config,
-                    traits=traits,
-                    apply_contraints=apply_constraints
-                )
-            except Exception as e:
-                logger.error(f'Farm {farm}: {e}')
-                continue
+
+        try:
+            get_s2_spectra(
+                output_dir=output_dir_farm,
+                lut_params_dir=lut_params_dir,
+                s2_mapper_config=s2_mapper_config,
+                rtm_lut_config=rtm_lut_config,
+                traits=traits
+            )
+        except Exception as e:
+            logger.error(f'Farm {farm}: {e}')
+            continue
 
         logger.info(f'Finished working on {farm}')
 
