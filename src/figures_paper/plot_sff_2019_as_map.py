@@ -17,6 +17,21 @@ trait_units = {
     'ccc': r'$g$ $m^{-2}$',
     'cab': r'$\mu g$ $cm^{-2}$',
 }
+trait_limits = {
+    'lai': (0, 2),
+    'ccc': (0.5, 2),
+    'cab': (40, 70),
+}
+trait_labels = {
+    'lai': 'GLAI',
+    'ccc': 'CCC',
+    'cab': 'Cab',
+}
+# map the F names to the actual field names
+field_parcel_mapping = {
+    'F2': 'Grund',
+    'F3': 'Schuerpunt',
+}
 
 
 def plot_sff_2019_as_map(
@@ -37,8 +52,11 @@ def plot_sff_2019_as_map(
     fpath_design : Path
         Path to the experimental design.
     """
+    # open a figure for plotting
+    f, ax = plt.subplots(ncols=len(field_parcels), nrows=3,
+                         figsize=(10, 12))
     # get the boundaries and design of the fields
-    for field in field_parcels:
+    for idx, field in enumerate(field_parcels):
         # boundaries from shape
         fpath_boundaries = fpath_design.joinpath(f'{field}.shp')
         boundaries = gpd.read_file(fpath_boundaries).to_crs(epsg=32632)
@@ -52,30 +70,78 @@ def plot_sff_2019_as_map(
             fpath_raster=fpath_traits,
             vector_features=boundaries
         )
-        # open a figure for plotting
-        f, ax = plt.subplots(ncols=3, nrows=1, figsize=(20, 10))
-        for idx, trait in enumerate(trait_units.keys()):
+        # calculate cab
+        cab = ds_complete['ccc'] / ds_complete['lai'] * 100
+        cab.rename('cab')
+        ds_complete.add_band(cab)
+        # plot the map
+        for tdx, trait in enumerate(trait_units.keys()):
+            if idx == 1:
+                colorbar_label = \
+                    f'{trait_labels[trait]} [{trait_units[trait]}]'
+            else:
+                colorbar_label = None
             ds_complete[trait].plot(
                 colormap='viridis',
-                colorbar_label=trait_units[trait],
-                ax=ax[idx]
+                colorbar_label=colorbar_label,
+                ax=ax[tdx, idx],
+                vmin=trait_limits[trait][0],
+                vmax=trait_limits[trait][1],
+                fontsize=20
             )
-            ax[idx].set_xlabel('')
-            ax[idx].set_xticklabels([])
-            ax[idx].set_ylabel('')
-            ax[idx].set_yticklabels([])
+            ax[tdx, idx].set_xlabel('')
+            ax[tdx, idx].set_xticklabels([])
+            ax[tdx, idx].set_ylabel('')
+            ax[tdx, idx].set_yticklabels([])
+            # set the field parcel name above the first row
+            if tdx == 0:
+                ax[tdx, idx].set_title(
+                    field_parcel_mapping[field],
+                    fontsize=20
+                )
+            else:
+                ax[tdx, idx].set_title('')
+            # set the trait name on the left and rotate it by 90 degrees
+            if idx == 0:
+                ax[tdx, idx].set_ylabel(
+                    trait_labels[trait],
+                    fontsize=20,
+                    rotation=90,
+                    labelpad=20
+                )
             # plot the design file on top. Remove the fill and label
             # the treatment zones
             design.plot(
-                ax=ax[idx],
-                column='crop_type',
-                edgecolor='black',
+                ax=ax[tdx, idx],
                 facecolor='none',
-                linewidth=8,
-                alpha=0.5
+                edgecolor='black',
+                linewidth=2
             )
+            # add the treatment labels
+            for _, row in design.iterrows():
+                ax[tdx, idx].text(
+                    row.geometry.centroid.x,
+                    row.geometry.centroid.y,
+                    row.Treatment,
+                    fontsize=14,
+                    horizontalalignment='center',
+                    verticalalignment='center',
+                    color='black',
+                    weight='bold'
+                )
+            # add the scale bar
+            scalebar = ScaleBar(
+                1,
+                location='lower right',
+                box_alpha=0,
+                font_properties={'size': 16}
+            )
+            ax[tdx, idx].add_artist(scalebar)
 
-
+    # save the figure
+    plt.tight_layout()
+    fpath_out = out_dir.joinpath('SFF_2019_treatments_map.png')
+    f.savefig(fpath_out, dpi=300, bbox_inches='tight')
 
 
 if __name__ == '__main__':
@@ -86,7 +152,7 @@ if __name__ == '__main__':
 
     fpath_scene = Path(
         '../../results/lut_based_inversion/SwissFutureFarm_2019/S2A_MSIL2A_20190420T103031_N0211_R108_T32TMT_20190420T132227.SAFE')  # noqa: E501
-    out_dir = Path('../../results/figures_paper')
+    out_dir = Path('../../results/Figures')
     parcels = ['F2', 'F3']
 
     # path to design from Argento et al.
