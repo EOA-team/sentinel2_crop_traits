@@ -240,7 +240,6 @@ def plot_trait_maps(
 
             fname_maps = out_dir.joinpath(
                 f'{farm}_{parcel_name}_Trait_Maps.png')
-            plt.tight_layout()
             f.savefig(fname_maps, bbox_inches='tight')
             plt.close(f)
 
