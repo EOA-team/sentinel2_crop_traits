@@ -159,7 +159,11 @@ def validate_data(
 
 if __name__ == '__main__':
 
-    traits = ['lai', 'ccc']
+    import os
+    cwd = Path(__file__).parent.absolute()
+    os.chdir(cwd)
+
+    traits = ['cab']  # ['lai', 'ccc', 'cab']
 
     # paths to in-situ trait measurements from 2019 and 2022
 
@@ -224,7 +228,12 @@ if __name__ == '__main__':
                 'trait_unit': r'$g$ $m^{-2}$',
                 'trait_limits': TraitLimits(0, 4),
                 'orig_trait_data': ccc_all
-            }
+            },
+            'cab': {
+                'trait_name': 'Leaf Chlorophyll Content',
+                'trait_unit': r'$\mu$ $g$ $cm^{-2}$',
+                'trait_limits': TraitLimits(0, 80),
+                'orig_trait_data': [lai_all, ccc_all]}
         }
 
         for trait in traits:
@@ -232,7 +241,36 @@ if __name__ == '__main__':
             out_dir = fpath_inv_res.parent.joinpath(f'validation_{trait}')
             out_dir.mkdir(exist_ok=True)
             # join in-situ and inversion data
-            insitu_trait_df = trait_settings[trait]['orig_trait_data']
+            if trait == 'cab':
+                insitu_trait_df = pd.merge(
+                    trait_settings[trait]['orig_trait_data'][0],
+                    trait_settings[trait]['orig_trait_data'][1],
+                    on=['point_id', 'gdd_cumsum', 'parcel', 'location']
+                )
+                # replace date_x with date and drop date_y
+                insitu_trait_df['date'] = insitu_trait_df['date_x']
+                insitu_trait_df.drop(
+                    columns=['date_x', 'date_y'], inplace=True)
+                # replace lai_x with lai and drop lai_y
+                insitu_trait_df['lai'] = insitu_trait_df['lai_x']
+                insitu_trait_df.drop(
+                    columns=['lai_x', 'lai_y'], inplace=True)
+
+                # calculate cab from lai and ccc
+                insitu_trait_df['cab'] = insitu_trait_df['ccc'] / \
+                    insitu_trait_df['lai'] * 100  # [ug/cm2]
+                # get all columns starting with 'lai' in inv_res_df
+                lai_cols = [
+                    col for col in inv_res_df.columns
+                    if col.startswith('lai')]
+                ccc_cols = [x.replace('lai', 'ccc') for x in lai_cols]
+                for idx, lai_col in enumerate(lai_cols):
+                    cab_col = lai_col.replace('lai', 'cab')
+                    inv_res_df[cab_col] = \
+                        inv_res_df[ccc_cols[idx]] / \
+                        inv_res_df[lai_col] * 100  # [ug/cm2]
+            else:
+                insitu_trait_df = trait_settings[trait]['orig_trait_data']
             del trait_settings[trait]['orig_trait_data']
             fpath_joined_res = out_dir.joinpath(
                 f'inv_res_joined_with_insitu_{trait}.csv')
