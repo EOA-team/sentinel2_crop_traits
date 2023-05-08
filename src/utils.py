@@ -327,7 +327,8 @@ def plot_prediction(
     )
     # plot linear regression
     ax.plot(
-        np.linspace(0, 8, num=true.shape[0]),
+        np.linspace(
+            trait_lims.lower, trait_lims.upper, num=true.shape[0]),
         modelled,
         linestyle='--',
         label='Linear Regression'
@@ -337,8 +338,8 @@ def plot_prediction(
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     if trait_name == 'Green Leaf Area Index':
         ax.text(4, 0.25, err_stats_str, bbox=props)
-    elif trait_name == 'Leaf Chlorophyll a+b Content':
-        ax.text(50, 2, err_stats_str, bbox=props)
+    elif trait_name == 'Leaf Chlorophyll Content':
+        ax.text(40, 10, err_stats_str, bbox=props)
     elif trait_name == 'Canopy Chlorophyll Content':
         ax.text(2.1, 0.25, err_stats_str, bbox=props)
 
