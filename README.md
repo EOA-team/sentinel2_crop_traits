@@ -1,4 +1,4 @@
-# Sentinel2 Crop Traits
+# Sentinel2 Crop Trait Retrieval
 
 This repository contains the Python code and data required to re-run the analysis and results presented in
 
