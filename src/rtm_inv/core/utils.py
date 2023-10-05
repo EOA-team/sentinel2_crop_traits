@@ -73,6 +73,7 @@ def resample_spectra(spectral_df: pd.DataFrame, sat_srf: pd.DataFrame, wl_column
     out_df = out_df.rename(columns={"index": "sat_bands"})
     return out_df
 
+
 def chlorophyll_carotiniod_constraint(lut_df: pd.DataFrame) -> pd.DataFrame:
     """
     Samples leaf carotenoid content based on leaf chlorophyll content
@@ -133,38 +134,8 @@ def chlorophyll_carotiniod_constraint(lut_df: pd.DataFrame) -> pd.DataFrame:
     out_df = lut_df.copy()
     out_df['car'] = car_samples
 
-    # import matplotlib.pyplot as plt
-    # import seaborn as sns
-    # plt.style.use('seaborn-darkgrid')
-    #
-    # cab_linspace = np.linspace(cab.min(), cab.max(), cab.shape[0])
-    # lower_constraint = lower_boundary(cab_linspace)
-    # upper_constraint = upper_boundary(cab_linspace)
-    # regression_line = cab_car_regression(cab_linspace)
-    # f, ax = plt.subplots(ncols=2, sharex=True, sharey=False, figsize=(20,10))
-    # sns.kdeplot(x='cab', y='car', data=lut_df, fill=True, ax=ax[0], cmap='viridis')
-    # sns.kdeplot(x=cab, y=car_samples, fill=True, ax=ax[1], cmap='viridis')
-    # ax[0].set_title(f'PROSPECT LUT; N={cab.shape[0]}', size=16)
-    # ax[1].set_title(f'Redistributed PROSPECT LUT; N={cab.shape[0]}', size=16)
-    # for idx in range(2):
-    #     ax[idx].set_xlabel(r'Leaf Chlorophyll a+b Content (PROSPECT) [$\mu g$ $cm^{-2}$]', fontsize=16)
-    #     ax[idx].set_ylabel(r'Leaf Carotenoid Content (PROSPECT) [$\mu g$ $cm^{-2}$]', fontsize=16)
-    #     ax[idx].plot(cab_linspace, upper_constraint, label='Upper Constraint',
-    #                  linestyle='dotted', color='grey', linewidth=2)
-    #     ax[idx].plot(cab_linspace, lower_constraint, label='Lower Constraint',
-    #                  linestyle='dashdot', color='grey', linewidth=2)
-    #     ax[idx].plot(cab_linspace, regression_line, linestyle='dashed', label='Cab-Car Regression',
-    #                  color='grey', linewidth=2)
-    # ax[1].legend(fontsize=14)
-    # ax[1].set_xlim(0,80)
-    # ax[1].set_ylim(0,30)
-    # ax[1].set_ylim(0,30)
-    # ax[1].tick_params(axis='both', labelsize=14)
-    # ax[0].tick_params(axis='both', labelsize=14)
-    # f.savefig('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/ccc_glai_relationship/regression/prosail_lut-example_cab-car.png',
-    #           bbox_inches='tight')
-
     return out_df
+
 
 def calc_ccc(glai: float | np.ndarray, cab: float | np.ndarray) -> float | np.ndarray:
     """
@@ -242,56 +213,8 @@ def glai_ccc_constraint(lut_df: pd.DataFrame) -> pd.DataFrame:
     cab_samples = ccc_samples / glai * 100
     out_df['cab'] = cab_samples
 
-    # import matplotlib.pyplot as plt
-    # import seaborn as sns
-    # plt.style.use('seaborn-darkgrid')
-    # glai_linspace = np.linspace(glai.min(), glai.max(), glai.shape[0])
-    # f, ax = plt.subplots(ncols=2, sharex=True, sharey=False, figsize=(20,10))
-    # sns.kdeplot(x='lai', y='cab', data=lut_df, ax=ax[0], cmap='viridis', fill=True)
-    # sns.kdeplot(x=glai, y=cab_samples, ax=ax[1], cmap='viridis', fill=True)
-    # ax[0].set_title(f'PROSAIL LUT; N={glai.shape[0]}', size=16)
-    # ax[1].set_title(f'Redistributed PROSAIL LUT; N={glai.shape[0]}', size=16)
-    # for idx in range(2):
-    #     ax[idx].set_xlabel(r'Green Leaf Area Index (PROSAIL) [$m^2$ $m^{-2}$]', fontsize=16)
-    #     ax[idx].set_ylabel(r'Leaf Chlorophyll a+b Content (PROSPECT) [$\mu g$ $m^{-2}$]', fontsize=16)
-    # ax[1].set_xlim(0,8)
-    # ax[0].set_ylim(0,80)
-    # ax[1].set_ylim(0,80)
-    # ax[1].tick_params(axis='both', labelsize=14)
-    # ax[0].tick_params(axis='both', labelsize=14)
-    # f.savefig('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/ccc_glai_relationship/regression/prosail_lut-example-glai-cab.png',
-    #           bbox_inches='tight')
-    
-    # lut_df['ccc'] = calc_ccc(lut_df['lai'], lut_df['cab'])
-    # glai_linspace = np.linspace(glai.min(), glai.max(), glai.shape[0])
-    # lower_constraint = lower_boundary(glai_linspace)
-    # upper_constraint = upper_boundary(glai_linspace)
-    # regression_line = glai_ccc_regression(glai_linspace)
-    # f, ax = plt.subplots(ncols=2, sharex=True, sharey=False, figsize=(20,10))
-    # sns.kdeplot(x='lai', y='ccc', data=lut_df, ax=ax[0], cmap='viridis', fill=True)
-    # sns.kdeplot(x=glai, y=ccc_samples, ax=ax[1], cmap='viridis', fill=True)
-    # ax[0].set_title(f'PROSAIL LUT; N={glai.shape[0]}', size=16)
-    # ax[1].set_title(f'Redistributed PROSAIL LUT; N={glai.shape[0]}', size=16)
-    # for idx in range(2):
-    #     ax[idx].set_xlabel(r'Green Leaf Area Index (PROSAIL) [$m^2$ $m^{-2}$]', fontsize=16)
-    #     ax[idx].set_ylabel(r'Canopy Chlorophyll Content (PROSAIL) [$g$ $m^{-2}$]', fontsize=16)
-    #     ax[idx].plot(glai_linspace, upper_constraint, label='Upper Constraint',
-    #                  linestyle='dotted', color='grey', linewidth=2
-    #     )
-    #     ax[idx].plot(glai_linspace, lower_constraint, label='Lower Constraint',
-    #                  linestyle='dashdot', color='grey', linewidth=2
-    #     )
-    #     ax[idx].plot(glai_linspace, regression_line, linestyle='dashed', label='GLAI-CCC Regression',
-    #                  color='grey', linewidth=2)
-    # ax[1].legend(fontsize=14)
-    # ax[1].set_xlim(0,8)
-    # ax[0].set_ylim(0,6)
-    # ax[1].set_ylim(0,6)
-    # ax[1].tick_params(axis='both', labelsize=14)
-    # ax[0].tick_params(axis='both', labelsize=14)
-    # f.savefig('/home/graflu/public/Evaluation/Projects/KP0031_lgraf_PhenomEn/03_WW_Traits/ccc_glai_relationship/regression/prosail_lut-example-glai-gcc.png',
-    #           bbox_inches='tight')
     return out_df
+
 
 def green_is_valid(wvls: np.ndarray, spectrum: np.ndarray) -> bool:
     """
@@ -318,6 +241,7 @@ def green_is_valid(wvls: np.ndarray, spectrum: np.ndarray) -> bool:
     else:
         return True
 
+    # TODO: use this code to produce a figure for the paper
     # import matplotlib.pyplot as plt
     # plt.style.use('seaborn-darkgrid')
     # plt.plot(wvls[green_wvls_idx[0]:green_wvls_idx[1]], green_spectrum)
@@ -330,6 +254,7 @@ def green_is_valid(wvls: np.ndarray, spectrum: np.ndarray) -> bool:
     # plt.legend()
     # plt.ylim(0,0.07)
     # plt.show()
+
 
 def transform_lai(lai: pd.Series | np.ndarray | float, inverse: Optional[bool] = False
                   ) -> pd.Series | np.ndarray | float:

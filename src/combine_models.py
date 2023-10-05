@@ -27,14 +27,15 @@ warnings.filterwarnings('ignore')
 MERGE_TOLERANCE = 20  # Growing Degrees [deg C]
 
 # AGDD windows for switching between phenological macro-stages
-GDD_CRITICAL_SE = [740, 870]  # Growing Degrees [deg C] # updated with 2021 + 2022 data
+GDD_CRITICAL_SE = [740, 870]  # Growing Degrees [deg C]
 GDD_DEFAULT_SE = 800
 GDD_CRITICAL_AN = [1380, 1600]  # Growing Degrees [deg C]
 GDD_DEFAULT_AN = 1490
 
+
 def combine_model_results(
     inv_res: pd.DataFrame,
-    traits: Optional[List[str]] = ['lai','ccc'],
+    traits: Optional[List[str]] = ['lai', 'ccc'],
     use_temperature_only: Optional[bool] = False
 ) -> pd.DataFrame:
     """
@@ -46,7 +47,7 @@ def combine_model_results(
     The algorithm works as follows:
 
         Until the first GDD critical threshold is reached, the outputs
-        of the germination-tillering model are used. Then, let the 
+        of the germination-tillering model are used. Then, let the
         cost function value decide when to switch into the next phase.
 
         Then, the stemelongation-endofheading model is used until we
@@ -73,7 +74,7 @@ def combine_model_results(
         # sort values by GDDs
         point_df.sort_values(by='gdd_cumsum', inplace=True)
         # filter by SCL (retain classes 4 and 5, only)
-        point_df = point_df[point_df.SCL.isin([4,5])].copy()
+        point_df = point_df[point_df.SCL.isin([4, 5])].copy()
         # # drop NaNs
         # trait_cols = [x for x in point_df.columns if x.startswith(trait)]
         # point_df.dropna(inplace=True, subset=trait_cols)
@@ -91,160 +92,165 @@ def combine_model_results(
         # then, let the uncertainty decide when to switch into the next phase
         switch_idx = None
         # search for switch idx between lower and upper T threshold
-        for idx, item in point_df[(point_df.gdd_cumsum >= GDD_CRITICAL_SE[0]) & (point_df.gdd_cumsum <= GDD_CRITICAL_SE[1])].iterrows():
-            if item[f'error_germination-endoftillering'] >= item[f'error_stemelongation-endofheading']:
+        for idx, item in point_df[
+            (point_df.gdd_cumsum >= GDD_CRITICAL_SE[0])
+                & (point_df.gdd_cumsum <= GDD_CRITICAL_SE[1])].iterrows():
+            if item['error_germination-endoftillering'] >= \
+                    item['error_stemelongation-endofheading']:
                 switch_idx = idx
                 break
-        if use_temperature_only: switch_idx = None
+        if use_temperature_only:
+            switch_idx = None
 
         # if no switch was found use default GDD thresholds
         if switch_idx is None:
-            point_df.loc[point_df.gdd_cumsum < GDD_DEFAULT_SE, 'Macro-Stage'] = 'germination - end of tillering'
-            point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_SE, 'Macro-Stage'] = 'stem elongation - end of heading'
-            point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_SE, 'Macro-Stage'] = 'stem elongation - end of heading'
+            point_df.loc[point_df.gdd_cumsum < GDD_DEFAULT_SE, 'Macro-Stage'] = 'germination - end of tillering'  # noqa: E501
+            point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_SE, 'Macro-Stage'] = 'stem elongation - end of heading'  # noqa: E501
+            point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_SE, 'Macro-Stage'] = 'stem elongation - end of heading'  # noqa: E501
 
             for trait_name in traits:
                 point_df.loc[point_df.gdd_cumsum < GDD_DEFAULT_SE, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_germination-endoftillering'].copy()
+                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_germination-endoftillering'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum < GDD_DEFAULT_SE, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_q05_germination-endoftillering'].copy()
+                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_q05_germination-endoftillering'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum < GDD_DEFAULT_SE, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_q95_germination-endoftillering'].copy()
-                
+                    point_df[point_df.gdd_cumsum < GDD_DEFAULT_SE][f'{trait_name}_q95_germination-endoftillering'].copy()  # noqa: E501
+
                 # at the temperatue threshold we use the mean of both models
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_SE, f'{trait_name} (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_stemelongation-endofheading'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_germination-endoftillering'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_germination-endoftillering'].copy()  # noqa: E501
+                    )  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_SE, f'{trait_name}_q05 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q05_stemelongation-endofheading'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q05_germination-endoftillering'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q05_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q05_germination-endoftillering'].copy()  # noqa: E501
+                    )  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_SE, f'{trait_name}_q95 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q95_stemelongation-endofheading'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q95_germination-endoftillering'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q95_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_SE][f'{trait_name}_q95_germination-endoftillering'].copy()  # noqa: E501
+                    )  # noqa: E501
 
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_SE, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_stemelongation-endofheading'].copy()
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_stemelongation-endofheading'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_SE, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_q05_stemelongation-endofheading'].copy()
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_q05_stemelongation-endofheading'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_SE, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_q95_stemelongation-endofheading'].copy()
-                
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_SE][f'{trait_name}_q95_stemelongation-endofheading'].copy()  # noqa: E501
 
         else:
-            point_df.loc[point_df.index < switch_idx, 'Macro-Stage'] = 'germination - end of tillering'
-            point_df.loc[point_df.index == switch_idx, 'Macro-Stage'] = 'stem elongation - end of heading'
-            point_df.loc[point_df.index > switch_idx, 'Macro-Stage'] = 'stem elongation - end of heading'
+            point_df.loc[point_df.index < switch_idx, 'Macro-Stage'] = 'germination - end of tillering'  # noqa: E501
+            point_df.loc[point_df.index == switch_idx, 'Macro-Stage'] = 'stem elongation - end of heading'  # noqa: E501
+            point_df.loc[point_df.index > switch_idx, 'Macro-Stage'] = 'stem elongation - end of heading'  # noqa: E501
 
             for trait_name in traits:
                 point_df.loc[point_df.index < switch_idx, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.index < switch_idx][f'{trait_name}_germination-endoftillering'].copy()
+                    point_df[point_df.index < switch_idx][f'{trait_name}_germination-endoftillering'].copy()  # noqa: E501
                 point_df.loc[point_df.index < switch_idx, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.index < switch_idx][f'{trait_name}_q05_germination-endoftillering'].copy()
+                    point_df[point_df.index < switch_idx][f'{trait_name}_q05_germination-endoftillering'].copy()  # noqa: E501
                 point_df.loc[point_df.index < switch_idx, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.index < switch_idx][f'{trait_name}_q95_germination-endoftillering'].copy()
+                    point_df[point_df.index < switch_idx][f'{trait_name}_q95_germination-endoftillering'].copy()  # noqa: E501
 
                 # at the switch index we use the mean of both models
                 point_df.loc[point_df.index == switch_idx, f'{trait_name} (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_stemelongation-endofheading'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_germination-endoftillering'].copy()
-                )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_germination-endoftillering'].copy()  # noqa: E501
+                )  # noqa: E501
                 point_df.loc[point_df.index == switch_idx, f'{trait_name}_q05 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_germination-endoftillering'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_germination-endoftillering'].copy()  # noqa: E501
+                    )  # noqa: E501
                 point_df.loc[point_df.index == switch_idx, f'{trait_name}_q95 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_germination-endoftillering'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_germination-endoftillering'].copy()  # noqa: E501
+                    )  # noqa: E501
 
                 point_df.loc[point_df.index > switch_idx, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_stemelongation-endofheading'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_stemelongation-endofheading'].copy()  # noqa: E501
                 point_df.loc[point_df.index > switch_idx, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy()  # noqa: E501
                 point_df.loc[point_df.index > switch_idx, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy()  # noqa: E501
 
         # switch into the next phase
         switch_idx = None
         # search for switch idx between lower and upper T threshold
-        for idx, item in point_df[(point_df.gdd_cumsum >= GDD_CRITICAL_AN[0]) & (point_df.gdd_cumsum <= GDD_CRITICAL_AN[1])].iterrows():
-            if item[f'error_flowering-fruitdevelopment-plantdead'] <= item[f'error_stemelongation-endofheading']:
+        for idx, item in point_df[(point_df.gdd_cumsum >= GDD_CRITICAL_AN[0]) & (point_df.gdd_cumsum <= GDD_CRITICAL_AN[1])].iterrows():  # noqa: E501
+            if item['error_flowering-fruitdevelopment-plantdead'] <= item['error_stemelongation-endofheading']:  # noqa: E501
                 switch_idx = idx
                 break
-        if use_temperature_only: switch_idx = None
+        if use_temperature_only:
+            switch_idx = None
 
         # if no switch was found use GDD threshold
         if switch_idx is None:
-            
-            point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_AN, 'Macro-Stage'] = 'flowering - fruit development - plant dead'
-            point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_AN, 'Macro-Stage'] = 'flowering - fruit development - plant dead'
-            
+
+            point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_AN, 'Macro-Stage'] = 'flowering - fruit development - plant dead'  # noqa: E501
+            point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_AN, 'Macro-Stage'] = 'flowering - fruit development - plant dead'  # noqa: E501
+
             for trait_name in traits:
                 # at the temperatue threshold we use the mean of both models
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_AN, f'{trait_name} (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_stemelongation-endofheading'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy() +   # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_stemelongation-endofheading'].copy()  # noqa: E501
+                    )  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_AN, f'{trait_name}_q05 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q05_stemelongation-endofheading'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy() +  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q05_stemelongation-endofheading'].copy()  # noqa: E501
+                    )  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum == GDD_DEFAULT_AN, f'{trait_name}_q95 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q95_stemelongation-endofheading'].copy()
-                    )
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy() +  # noqa: E501
+                        point_df[point_df.gdd_cumsum == GDD_DEFAULT_AN][f'{trait_name}_q95_stemelongation-endofheading'].copy()  # noqa: E501
+                    )  # noqa: E501
 
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_AN, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_AN, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
                 point_df.loc[point_df.gdd_cumsum > GDD_DEFAULT_AN, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.gdd_cumsum > GDD_DEFAULT_AN][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
 
         else:
-            point_df.loc[point_df.index == switch_idx, 'Macro-Stage'] = 'flowering - fruit development - plant dead'
-            point_df.loc[point_df.index > switch_idx, 'Macro-Stage'] = 'flowering - fruit development - plant dead'
-            
+            point_df.loc[point_df.index == switch_idx, 'Macro-Stage'] = 'flowering - fruit development - plant dead'  # noqa: E501
+            point_df.loc[point_df.index > switch_idx, 'Macro-Stage'] = 'flowering - fruit development - plant dead'  # noqa: E501
+
             for trait_name in traits:
                 # at the switch index we use the mean of both models
                 point_df.loc[point_df.index == switch_idx, f'{trait_name} (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_stemelongation-endofheading'].copy()
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_stemelongation-endofheading'].copy()  # noqa: E501
                     )
                 point_df.loc[point_df.index == switch_idx, f'{trait_name}_q05 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy()
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q05_stemelongation-endofheading'].copy()  # noqa: E501
                     )
                 point_df.loc[point_df.index == switch_idx, f'{trait_name}_q95 (Phenology)'] = \
-                    0.5 * (
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy() +
-                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy()
+                    0.5 * (  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy() +  # noqa: E501
+                        point_df[point_df.index == switch_idx][f'{trait_name}_q95_stemelongation-endofheading'].copy()  # noqa: E501
                     )
 
                 point_df.loc[point_df.index > switch_idx, f'{trait_name} (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
                 point_df.loc[point_df.index > switch_idx, f'{trait_name}_q05 (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_q05_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
                 point_df.loc[point_df.index > switch_idx, f'{trait_name}_q95 (Phenology)'] = \
-                    point_df[point_df.index > switch_idx][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy()
+                    point_df[point_df.index > switch_idx][f'{trait_name}_q95_flowering-fruitdevelopment-plantdead'].copy()  # noqa: E501
         # append results to list
         inv_res_combined.append(point_df)
 
     return pd.concat(inv_res_combined)
+
 
 def combine_model_results_with_insitu(
     sampling_point_dir: Path,
@@ -296,7 +302,8 @@ def combine_model_results_with_insitu(
 
         # get weather station data (single weather station per site)
         location_name_nowhitespace = location_name.replace(' ', '').lower()
-        meteo_file = next(meteo_data_dir.glob(f'*_{location_name_nowhitespace}_daily_mean_temperature*'))
+        meteo_file = next(meteo_data_dir.glob(
+            f'*_{location_name_nowhitespace}_daily_mean_temperature*'))
         # data can either come from Agrometeo or MeteoSwiss
         if meteo_file.name.endswith('meteoswiss.txt'):
             raw_meteo = from_meteoswiss(meteo_file)
@@ -304,14 +311,17 @@ def combine_model_results_with_insitu(
         else:
             raw_meteo = from_agrometeo(meteo_file)
             columns = raw_meteo.columns
-            column_tmean = [x for x in columns if x.endswith('Temperatur Durchschnitt +2 m (°C)')][0]
+            column_tmean = [
+                x for x in columns if x.endswith(
+                    'Temperatur Durchschnitt +2 m (°C)')][0]
         # calculate GDDs
         gdd_meteo = calc_ww_gdd(
             temp_df=raw_meteo, column_tmean=column_tmean
         )
         res_dir_location = res_dir.joinpath(location_name)
         res_dir_location.mkdir(exist_ok=True)
-        # shrink to time period between sowing and harvest and calculate cumulative GDDs
+        # shrink to time period between sowing and harvest and
+        # calculate cumulative GDDs
         # per field parcel geometry
         parcels = location_df.groupby('Parcel')
         for parcel_name, parcel_df in parcels:
@@ -320,9 +330,11 @@ def combine_model_results_with_insitu(
             gdd_meteo_parcel = gdd_meteo[sowing_date:harvest_date].copy()
             gdd_meteo_parcel['gdd_cumsum'] = gdd_meteo_parcel.gdd.cumsum()
             gdd_meteo_parcel.reset_index(inplace=True)
-            # get the field parcel geometry so that the correct in-situ observations are selected
+            # get the field parcel geometry so that the correct in-situ
+            # observations are selected
             # I know that's ugly
-            if parcel_name == 'Parzelle 35': parcel_name = 'Parzelle35'
+            if parcel_name == 'Parzelle 35':
+                parcel_name = 'Parzelle35'
             fpath_parcel_geom = field_parcel_dir.joinpath(
                 location_name
             ).joinpath(
@@ -333,7 +345,8 @@ def combine_model_results_with_insitu(
             try:
                 parcel_points = gpd.read_file(
                     next(
-                        sampling_point_dir.joinpath(location_name).glob(f'{parcel_name}.gpkg')
+                        sampling_point_dir.joinpath(
+                            location_name).glob(f'{parcel_name}.gpkg')
                     )
                 )
             except Exception as e:
@@ -342,14 +355,16 @@ def combine_model_results_with_insitu(
 
             res_dir_parcel = res_dir_location.joinpath(parcel_name)
             res_dir_parcel.mkdir(exist_ok=True)
-            # find the inversion results available, extract data and assign GDDs
+            # find the inversion results available, extract data and assign
+            # GDDs
             inv_res_data_list = []
             for fpath_inv_res in inv_res_dir_location.glob('*.SAFE'):
-                inv_res_date = pd.to_datetime(fpath_inv_res.name.split('_')[2][0:8])
+                inv_res_date = pd.to_datetime(
+                    fpath_inv_res.name.split('_')[2][0:8])
 
                 # check if observations is between sowing and harvest
                 if inv_res_date < sowing_date or inv_res_date > harvest_date:
-                        continue
+                    continue
                 # get cumulative GDD of the date
                 inv_res_gdd = gdd_meteo_parcel[
                     gdd_meteo_parcel.date == inv_res_date
@@ -363,7 +378,8 @@ def combine_model_results_with_insitu(
                 )
 
                 # loop over pixels and save inversion results and spectral data
-                for point_id, parcel_point in parcel_points.groupby('point_id'):
+                for point_id, parcel_point in parcel_points.groupby(
+                        'point_id'):
                     # save predictions and metadata
                     inv_res_data = {
                         'scene_id': fpath_inv_res.name,
@@ -379,37 +395,44 @@ def combine_model_results_with_insitu(
                         )
                         pheno_phase_model = fpath_model.name.split('_')[0]
                         # get pixel values at sampling points
-                        parcel_point_utm = parcel_point.to_crs(pred_ds[pred_ds.band_names[0]].crs)
+                        parcel_point_utm = parcel_point.to_crs(
+                            pred_ds[pred_ds.band_names[0]].crs)
                         parcel_point_buffered = parcel_point_utm.buffer(10)
                         pred_ds_clipped = pred_ds.clip_bands(
-                            clipping_bounds=parcel_point_buffered.geometry.values[0]
+                            clipping_bounds=parcel_point_buffered.geometry.values[0]  # noqa: E501
                         )
 
                         for trait in traits:
                             inv_res_data[f'{trait}_{pheno_phase_model}'] = \
-                                pred_ds_clipped[trait].reduce(['mean'])[0]['mean']
+                                pred_ds_clipped[trait].reduce(['mean'])[0]['mean']  # noqa: E501
                             inv_res_data[f'{trait}_q05_{pheno_phase_model}'] = \
-                                pred_ds_clipped[f'{trait}_q05'].reduce(['mean'])[0]['mean']
+                                pred_ds_clipped[f'{trait}_q05'].reduce(['mean'])[0]['mean']  # noqa: E501
                             inv_res_data[f'{trait}_q95_{pheno_phase_model}'] = \
-                                pred_ds_clipped[f'{trait}_q95'].reduce(['mean'])[0]['mean']
+                                pred_ds_clipped[f'{trait}_q95'].reduce(['mean'])[0]['mean']  # noqa: E501
                         # get the value (error) of the cost function found
                         try:
                             inv_res_data[f'error_{pheno_phase_model}'] = \
-                                pred_ds_clipped['median_error'].reduce(['mean'])[0]['mean']
+                                pred_ds_clipped['median_error'].reduce(['mean'])[0]['mean']  # noqa: E501
                         except KeyError:
-                                continue
+                            continue
 
                         s2_srf_clipped = s2_srf_ds.clip_bands(
-                            clipping_bounds=parcel_point_buffered.geometry.values[0]
+                            clipping_bounds=parcel_point_buffered.geometry.values[0]  # noqa: E501
                         )
-                        # get the most common SCL class and set the observation to that class
+                        # get the most common SCL class and set the observation
+                        # to that class
                         most_common_scl = np.argmax(
-                            np.bincount(s2_srf_clipped['SCL'].values.data.flatten().astype(int))
+                            np.bincount(
+                                s2_srf_clipped['SCL'].values.data.flatten(
+                                    ).astype(int))
                         )
                         inv_res_data['SCL'] = most_common_scl
-                        sel_keys = [x for x in s2_srf_clipped.band_names if x != 'SCL']
+                        sel_keys = [
+                            x for x in s2_srf_clipped.band_names if x != 'SCL']
                         for sel_key in sel_keys:
-                            inv_res_data[sel_key] = s2_srf_clipped[sel_key].reduce(['mean'])[0]['mean']
+                            inv_res_data[sel_key] = \
+                                s2_srf_clipped[sel_key].reduce(
+                                    ['mean'])[0]['mean']
 
                         if plot:
                             plot_trait_maps(
@@ -441,6 +464,7 @@ def combine_model_results_with_insitu(
         large_df = pd.concat(large_res_list)
         fname = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
         large_df.to_csv(fname)
+
 
 def extract_2019_data(
     site_char_df: pd.DataFrame,
@@ -476,7 +500,8 @@ def extract_2019_data(
         try:
             parcel_points = gpd.read_file(
                 next(
-                    sampling_point_dir.joinpath(location_name).glob(f'{parcel_name}.gpkg')
+                    sampling_point_dir.joinpath(
+                        location_name).glob(f'{parcel_name}.gpkg')
                 )
             )
         except Exception as e:
@@ -484,7 +509,8 @@ def extract_2019_data(
             continue
         res_dir_parcel = res_dir.joinpath(parcel_name)
         res_dir_parcel.mkdir(exist_ok=True)
-        # find the inversion results available, extract data -> there's just one scene
+        # find the inversion results available, extract data -> there's
+        # just one scene
         inv_res_data_list = []
         for fpath_inv_res in res_dir.glob('*.SAFE'):
 
@@ -494,7 +520,8 @@ def extract_2019_data(
                 fpath_s2_srf,
                 vector_features=parcel_gdf
             )
-            inv_res_date = pd.to_datetime(fpath_inv_res.name.split('_')[2][0:8])
+            inv_res_date = pd.to_datetime(
+                fpath_inv_res.name.split('_')[2][0:8])
 
             # loop over pixels and save inversion results and spectral data
             for point_id, parcel_point in parcel_points.groupby('sample_id'):
@@ -512,7 +539,8 @@ def extract_2019_data(
                     )
                     pheno_phase_model = fpath_model.name.split('_')[0]
                     # get pixel values at sampling points
-                    parcel_point_utm = parcel_point.to_crs(pred_ds[pred_ds.band_names[0]].crs)
+                    parcel_point_utm = parcel_point.to_crs(
+                        pred_ds[pred_ds.band_names[0]].crs)
                     pred_ds_clipped = pred_ds.clip_bands(
                         clipping_bounds=parcel_point_utm.geometry.values[0]
                     )
@@ -521,46 +549,52 @@ def extract_2019_data(
                         inv_res_data[f'{trait}_{pheno_phase_model}'] = \
                             pred_ds_clipped[trait].reduce(['mean'])[0]['mean']
                         inv_res_data[f'{trait}_q05_{pheno_phase_model}'] = \
-                            pred_ds_clipped[f'{trait}_q05'].reduce(['mean'])[0]['mean']
+                            pred_ds_clipped[f'{trait}_q05'].reduce(['mean'])[0]['mean']  # noqa: E501
                         inv_res_data[f'{trait}_q95_{pheno_phase_model}'] = \
-                            pred_ds_clipped[f'{trait}_q95'].reduce(['mean'])[0]['mean']
+                            pred_ds_clipped[f'{trait}_q95'].reduce(['mean'])[0]['mean']  # noqa: E501
                     # get the value (error) of the cost function found
                     try:
                         inv_res_data[f'error_{pheno_phase_model}'] = \
-                            pred_ds_clipped['median_error'].reduce(['mean'])[0]['mean']
+                            pred_ds_clipped['median_error'].reduce(['mean'])[0]['mean']  # noqa: E501
                     except KeyError:
-                            continue
+                        continue
 
                     s2_srf_clipped = s2_srf_ds.clip_bands(
                         clipping_bounds=parcel_point_utm.geometry.values[0]
                     )
-                    # get the most common SCL class and set the observation to that class
+                    # get the most common SCL class and set the observation to
+                    # that class
                     most_common_scl = np.argmax(
-                        np.bincount(s2_srf_clipped['SCL'].values.data.flatten().astype(int))
+                        np.bincount(s2_srf_clipped['SCL'].values.data.flatten(
+                            ).astype(int))
                     )
                     inv_res_data['SCL'] = most_common_scl
-                    sel_keys = [x for x in s2_srf_clipped.band_names if x != 'SCL']
+                    sel_keys = \
+                        [x for x in s2_srf_clipped.band_names if x != 'SCL']
                     for sel_key in sel_keys:
-                        inv_res_data[sel_key] = s2_srf_clipped[sel_key].reduce(['mean'])[0]['mean']
+                        inv_res_data[sel_key] = \
+                            s2_srf_clipped[sel_key].reduce(['mean'])[0]['mean']
 
                     inv_res_data_list.append(inv_res_data)
 
             res_inv_df = pd.DataFrame(inv_res_data_list)
             for trait in traits:
-                res_inv_df[f'{trait} (Phenology)'] = res_inv_df[f'{trait}_germination-endoftillering']
-            
+                res_inv_df[f'{trait} (Phenology)'] = \
+                    res_inv_df[f'{trait}_germination-endoftillering']
+
             # add parcel and location name
             res_inv_df['parcel'] = parcel_name
             res_inv_df['location'] = location_name
-            res_inv_df['gdd_cumsum'] = 999 # this is a placeholder
+            res_inv_df['gdd_cumsum'] = 999  # this is a placeholder
             large_res_list.append(res_inv_df)
 
     large_df = pd.concat(large_res_list)
     return large_df
 
+
 if __name__ == '__main__':
 
-    ### 2022 data
+    # 2022 data
 
     # directory where weather station and field parcel geometry data is stored
     aux_data_dir = Path('../data/auxiliary')
@@ -579,16 +613,17 @@ if __name__ == '__main__':
     # traits to extract
     traits = ['lai', 'ccc']
     trait_labels = [r'$m^2$ $m^{-2}$', r'$g$ $m^{-2}$']
-    trait_limits = [(0,8), (0,4)]
+    trait_limits = [(0, 8), (0, 4)]
     use_temperature_only_opts = [True, False]
 
     for use_temperature_only in use_temperature_only_opts:
         # directory for storing results
         dirname = 'agdds_and_s2'
-        if use_temperature_only: dirname = 'agdds_only'
+        if use_temperature_only:
+            dirname = 'agdds_only'
         res_dir = inv_res_dir.joinpath(dirname)
         res_dir.mkdir(exist_ok=True)
-    
+
         combine_model_results_with_insitu(
             sampling_point_dir=sampling_point_dir,
             field_parcel_dir=field_parcel_dir,
@@ -603,7 +638,7 @@ if __name__ == '__main__':
             use_temperature_only=use_temperature_only
         )
 
-    ### 2019
+    # 2019
     # add 2019 data. Since we deal with a single observation, we use the known
     # BBCH status (at stem elongation)
     sampling_point_dir = aux_data_dir.joinpath('sampling_points_ww_2019')
@@ -618,13 +653,17 @@ if __name__ == '__main__':
         sheet_name='PhenomEn_Sites_2019_short'
     )
 
-    df_2019 = extract_2019_data(site_char_df=sites_2019, res_dir=inv_res, traits=traits)
+    df_2019 = extract_2019_data(
+        site_char_df=sites_2019,
+        res_dir=inv_res,
+        traits=traits)
 
     # append to 2022 data
     for use_temperature_only in use_temperature_only_opts:
         # directory for storing results
         dirname = 'agdds_and_s2'
-        if use_temperature_only: dirname = 'agdds_only'
+        if use_temperature_only:
+            dirname = 'agdds_only'
         res_dir = inv_res_dir.joinpath(dirname)
         fpath_csv = res_dir.joinpath('inv_res_gdd_insitu_points.csv')
         df_2022 = pd.read_csv(fpath_csv)

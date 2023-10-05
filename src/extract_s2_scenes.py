@@ -20,7 +20,7 @@ from eodal.mapper.mapper import Mapper, MapperConfigs
 from eodal.utils.sentinel2 import get_S2_platform_from_safe
 from pathlib import Path
 from rtm_inv.core.lookup_table import generate_lut
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from utils import get_farms
 
@@ -29,12 +29,14 @@ settings.USE_STAC = False
 logger = settings.logger
 
 # Sentinel-2 bands to extract and use for PROSAIL runs
-band_selection = ['B02','B03','B04','B05','B06','B07','B8A','B11','B12']
+band_selection = [
+    'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B8A', 'B11', 'B12']
+
 
 def preprocess_sentinel2_scenes(
         ds: Sentinel2,
         target_resolution: int,
-    ) -> Sentinel2:
+) -> Sentinel2:
     """
     Resample Sentinel-2 scenes and mask clouds, shadows, and snow
     based on the Scene Classification Layer (SCL).
@@ -55,6 +57,7 @@ def preprocess_sentinel2_scenes(
     ds.mask_clouds_and_shadows(inplace=True)
     return ds
 
+
 def get_s2_mapper(
     s2_mapper_config: MapperConfigs,
     output_dir: Path
@@ -63,8 +66,8 @@ def get_s2_mapper(
     Setup an EOdal `Mapper` instance, query and load Sentinel-2 data
 
     :param s2_mapper_config:
-        configuration telling EOdal what to do (which geographic region and time
-        period should be processed)
+        configuration telling EOdal what to do (which geographic region and
+        time period should be processed)
     :param output_dir:
         directory where to store the query for documentation
     :returns:
@@ -105,20 +108,23 @@ def get_s2_mapper(
         if scene.is_blackfilled:
             scenes_to_del.append(scene_id)
             mapper.metadata.loc[
-                mapper.metadata.sensing_time.dt.strftime('%Y-%m-%d %H:%M') == \
-                scene_id.strftime('%Y-%m-%d %H:%M')[0:16], 'scene_used'] = 'No [blackfill]'
+                mapper.metadata.sensing_time.dt.strftime('%Y-%m-%d %H:%M') ==
+                scene_id.strftime(
+                    '%Y-%m-%d %H:%M')[0:16], 'scene_used'] = 'No [blackfill]'
             continue
         if scene['blue'].values.mask.all():
             scenes_to_del.append(scene_id)
             mapper.metadata.loc[
-                mapper.metadata.sensing_time.dt.strftime('%Y-%m-%d %H:%M') == \
-                scene_id.strftime('%Y-%m-%d %H:%M')[0:16], 'scene_used'] = 'No [clouds]'
+                mapper.metadata.sensing_time.dt.strftime('%Y-%m-%d %H:%M') ==
+                scene_id.strftime(
+                    '%Y-%m-%d %H:%M')[0:16], 'scene_used'] = 'No [clouds]'
             continue
     # delete scenes too cloudy or containing only no-data
     for scene_id in scenes_to_del:
         del mapper.data[scene_id]
     # save the MapperConfigs as yaml file
-    s2_mapper_config.to_yaml(fpath=output_dir.joinpath('eodal_mapper_configs.yml'))
+    s2_mapper_config.to_yaml(
+        fpath=output_dir.joinpath('eodal_mapper_configs.yml'))
     # save the mapper data as pickled object so it can be loaded again
     with open(fpath_mapper, 'wb+') as dst:
         dst.write(mapper.data.to_pickle())
@@ -127,17 +133,20 @@ def get_s2_mapper(
     if 'real_path' in mapper.metadata.columns:
         mapper.metadata.real_path = mapper.metadata.real_path.astype(str)
     if '_processing_level' in mapper.metadata.columns:
-        mapper.metadata._processing_level = mapper.metadata._processing_level.astype(str)
+        mapper.metadata._processing_level = \
+            mapper.metadata._processing_level.astype(str)
     mapper.metadata.to_file(fpath_metadata)
 
     return mapper
+
 
 def get_s2_spectra(
     output_dir: Path,
     lut_params_dir: Path,
     s2_mapper_config: Dict[str, Any],
     rtm_lut_config: Dict[str, Any],
-    traits: List[str]
+    traits: List[str],
+    apply_contraints: Optional[bool] = True
 ) -> None:
     """
     Extract S2 SRF for field parcel geometries and run PROSAIL in forward mode
@@ -147,14 +156,16 @@ def get_s2_spectra(
     :param lut_params_dir:
         directory where the PROSAIL inputs are stored
     :param s2_mapper_config:
-        configuration telling EOdal what to do (which geographic region and time
-        period should be processed)
+        configuration telling EOdal what to do (which geographic region and
+        time period should be processed)
     :param rtm_lut_config:
         configuration telling how to build the lookup tables (LUTs) required
         to run PROSAIL
     :param traits:
         name of the PROSAIL traits to save to the LUTs (determines which traits
         are available from the inversion)
+    :param apply_constraints:
+        whether to apply the GLAI-CCC and Cab-Car constraint. Default is True.
     """
     trait_str = '-'.join(traits)
 
@@ -166,7 +177,7 @@ def get_s2_spectra(
     for _, scene in s2_data:
         # make sure we're looking at the right metadata
         metadata = s2_metadata[
-            s2_metadata.sensing_date.dt.date == \
+            s2_metadata.sensing_date.dt.date ==
             scene.scene_properties.acquisition_time.date()
         ]
         # to speed model development introduce some calendar checks, i.e., we
@@ -174,11 +185,17 @@ def get_s2_spectra(
         scene_month = pd.to_datetime(metadata.sensing_time.iloc[0]).month
         pheno_phase_selection = None
         if scene_month in [3]:
-            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+            pheno_phase_selection = [
+                'all_phases', 'germination-endoftillering',
+                'stemelongation-endofheading']
         elif scene_month in [4]:
-            pheno_phase_selection = ['all_phases', 'germination-endoftillering', 'stemelongation-endofheading']
+            pheno_phase_selection = [
+                'all_phases', 'germination-endoftillering',
+                'stemelongation-endofheading']
         elif scene_month in [5, 6]:
-            pheno_phase_selection = ['all_phases', 'stemelongation-endofheading', 'flowering-fruitdevelopment-plantdead']
+            pheno_phase_selection = [
+                'all_phases', 'stemelongation-endofheading',
+                'flowering-fruitdevelopment-plantdead']
 
         # get viewing and illumination angles for PROSAIL run
         angle_dict = {
@@ -196,7 +213,8 @@ def get_s2_spectra(
         platform = full_names[platform]
         rtm_lut_config.update({'sensor': platform})
 
-        # save spectra and PROSAIL simulations in a sub-directory for each scene
+        # save spectra and PROSAIL simulations in a sub-directory for
+        # each scene
         res_dir_scene = output_dir.joinpath(metadata['product_uri'].iloc[0])
         res_dir_scene.mkdir(exist_ok=True)
 
@@ -210,47 +228,65 @@ def get_s2_spectra(
         # run PROSAIL forward runs for the different parametrizations available
         logger.info(f'{metadata.product_uri.iloc[0]} starting PROSAIL runs')
         for lut_params_pheno in lut_params_dir.glob('*.csv'):
-            pheno_phases = lut_params_pheno.name.split('etal')[-1].split('.')[0][1::]
+            pheno_phases = \
+                lut_params_pheno.name.split('etal')[-1].split('.')[0][1::]
             if pheno_phase_selection is not None:
                 if pheno_phases not in pheno_phase_selection:
                     continue
-    
+
             # generate lookup-table for the current angles
-            fpath_lut = res_dir_scene.joinpath(f'{pheno_phases}_{trait_str}_lut.pkl')
+            if apply_contraints:
+                fpath_lut = res_dir_scene.joinpath(
+                    f'{pheno_phases}_{trait_str}_lut.pkl')
+            else:
+                fpath_lut = res_dir_scene.joinpath(
+                    f'{pheno_phases}_{trait_str}_lut_no-constraints.pkl')
             # if LUT exists, continue, else generate it
             if not fpath_lut.exists():
                 lut_inp = rtm_lut_config.copy()
                 lut_inp.update(angle_dict)
+                if not apply_contraints:
+                    lut_inp.update({
+                        'apply_glai_ccc_constraint': False,
+                        'apply_chlorophyll_carotiniod_constraint': False
+                    })
                 lut_inp['lut_params'] = lut_params_pheno
                 lut = generate_lut(**lut_inp)
-                # special case CCC (Canopy Chlorophyll Content) -> this is not a direct RTM output
+                # special case CCC (Canopy Chlorophyll Content) ->
+                # this is not a direct RTM output
                 if 'ccc' in traits:
                     lut['ccc'] = lut['lai'] * lut['cab']
                     # convert to g m-2 as this is the more common unit
                     # ug -> g: factor 1e-6; cm2 -> m2: factor 1e-4
                     lut['ccc'] *= 1e-2
-            else:
-                continue
-    
-            # prepare LUT for model training
-            lut = lut[band_selection + traits].copy()
-            lut.dropna(inplace=True)
-    
-            # save LUT to file
-            if not fpath_lut.exists():
+
+                # prepare LUT for model training
+                # lut = lut[band_selection + traits].copy()
+                lut.dropna(inplace=True)
+
+                # save LUT to file
+                # if not fpath_lut.exists():
                 with open(fpath_lut, 'wb+') as f:
                     pickle.dump(lut, f)
+            else:
+                continue
 
         logger.info(f'{metadata.product_uri.iloc[0]} finished PROSAIL runs')
 
+
 if __name__ == '__main__':
 
-    ### global setup
+    cwd = Path(__file__).parent.absolute()
+    import os
+    os.chdir(cwd)
+
+    # global setup
     out_dir = Path('../results').joinpath('lut_based_inversion')
     out_dir.mkdir(exist_ok=True)
 
     # spectral response function of Sentinel-2 for resampling PROSAIL output
-    fpath_srf = Path('../data/auxiliary/S2-SRF_COPE-GSEG-EOPG-TN-15-0007_3.1.xlsx')
+    fpath_srf = Path(
+        '../data/auxiliary/S2-SRF_COPE-GSEG-EOPG-TN-15-0007_3.1.xlsx')
     # RTM configurations for lookup-table generation
     rtm_lut_config = {
         'lut_size': 50000,
@@ -263,18 +299,18 @@ if __name__ == '__main__':
     lut_params_dir = Path('lut_params')
 
     # target trait(s)
-    traits = ['lai', 'ccc']
+    traits = ['lai', 'cab', 'ccc', 'car']
 
     # metadata filters for retrieving S2 scenes
     metadata_filters = [
-        Filter('cloudy_pixel_percentage','<', 50),
+        Filter('cloudy_pixel_percentage', '<', 50),
         Filter('processing_level', '==', 'Level-2A')
     ]
 
     #######################################################################
 
-    ### extraction for 2019
-    data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
+    # extraction for 2019
+    data_dir = Path('../data/auxiliary/field_parcels_ww_2019')
     year = 2019
     farms = ['SwissFutureFarm']
 
@@ -288,14 +324,15 @@ if __name__ == '__main__':
         feature = Feature.from_geoseries(gds=geom.geometry)
         s2_mapper_config = MapperConfigs(
             collection='sentinel2-msi',
-            time_start=datetime(year,4,10),
-            time_end=datetime(year,4,21),
+            time_start=datetime(year, 4, 10),
+            time_end=datetime(year, 4, 21),
             feature=feature,
             metadata_filters=metadata_filters
         )
 
         output_dir_farm = out_dir.joinpath(f'{farm}_{year}')
         output_dir_farm.mkdir(exist_ok=True)
+
         try:
             get_s2_spectra(
                 output_dir=output_dir_farm,
@@ -310,7 +347,7 @@ if __name__ == '__main__':
 
         logger.info(f'Finished working on {farm}')
 
-    ### extraction for 2022
+    # extraction for 2022
     data_dir = Path('../data/auxiliary/field_parcels_ww_2022')
     year = 2022
     farms = ['Strickhof', 'Arenenberg', 'Witzwil', 'SwissFutureFarm']
@@ -325,24 +362,29 @@ if __name__ == '__main__':
         feature = Feature.from_geoseries(gds=geom.geometry)
         s2_mapper_config = MapperConfigs(
             collection='sentinel2-msi',
-            time_start=datetime(year,3,1),
-            time_end=datetime(year,7,31),
+            time_start=datetime(year, 3, 1),
+            time_end=datetime(year, 7, 31),
             feature=feature,
             metadata_filters=metadata_filters
         )
 
         output_dir_farm = out_dir.joinpath(farm)
         output_dir_farm.mkdir(exist_ok=True)
-        try:
-            get_s2_spectra(
-                output_dir=output_dir_farm,
-                lut_params_dir=lut_params_dir,
-                s2_mapper_config=s2_mapper_config,
-                rtm_lut_config=rtm_lut_config,
-                traits=traits
-            )
-        except Exception as e:
-            logger.error(f'Farm {farm}: {e}')
-            continue
+        apply_constraints_list = [False, True]
+        for apply_constraints in apply_constraints_list:
+            try:
+                logger.info(
+                    f'Apply physiological constraint: {apply_constraints}')
+                get_s2_spectra(
+                    output_dir=output_dir_farm,
+                    lut_params_dir=lut_params_dir,
+                    s2_mapper_config=s2_mapper_config,
+                    rtm_lut_config=rtm_lut_config,
+                    traits=traits,
+                    apply_contraints=apply_constraints
+                )
+            except Exception as e:
+                logger.error(f'Farm {farm}: {e}')
+                continue
 
         logger.info(f'Finished working on {farm}')
